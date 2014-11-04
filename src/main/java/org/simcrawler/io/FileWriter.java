@@ -49,7 +49,7 @@ public class FileWriter {
 	 * @throws java.io.IOException
 	 */
 	public static void write(String file, boolean append, String content) throws FileNotFoundException, IOException {
-		FileWriter.write(file, false, content, FileWriter.DEFAULT_ENCODING);
+		FileWriter.write(file, append, content, FileWriter.DEFAULT_ENCODING);
 	}
 
 	/**
@@ -66,10 +66,8 @@ public class FileWriter {
 
 		try {
 			writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file, append), encoding));
-			if ( append )
-				writer.append(content);
-			else
-				writer.write(content);
+			writer.write(content);
+			writer.flush();
 		}
 		finally {
 			if ( writer != null )

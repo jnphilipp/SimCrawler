@@ -18,6 +18,7 @@ import org.simcrawler.io.FileWriter;
  * @version 0.0.1
  */
 public class BFSStrategy implements CrawlingStrategy {
+	private int good = 0;
 	private int k;
 	private Map<String, Integer> quality;
 	private Map<String, Set<String>> graph;
@@ -51,14 +52,14 @@ public class BFSStrategy implements CrawlingStrategy {
 	public void start(Collection<String> urls, String stepQualityFile) {
 		Set<String> crawled = new LinkedHashSet<>();
 		Queue<String> queue = new PriorityQueue<>(urls);
-		Integer good = 0;
+		this.good = 0;
 
 		while ( !queue.isEmpty() ) {
-			this.doStep(crawled, queue, good, stepQualityFile);
+			this.doStep(crawled, queue, stepQualityFile);
 		}
 	}
 
-	private void doStep(Set<String> crawled, Queue<String> queue, Integer good, String stepQualityFile) {
+	private void doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
 		for ( int i = 0; i < this.k; i++ ) {
 			if ( queue.peek() == null ) {
 				Logger.error(BFSStrategy.class, "Empty queue aborting.");
@@ -66,19 +67,21 @@ public class BFSStrategy implements CrawlingStrategy {
 			}
 
 			crawled.add(queue.peek());
-			queue.addAll(CollectionUtils.subtract(this.crawl(queue.poll(), good), crawled));
+			Logger.info(BFSStrategy.class, "good: " + this.good);
+			queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.crawl(queue.poll()), crawled), queue));
 		}
 
 		try {
-			FileWriter.write(stepQualityFile, true, String.format("%s/%s=%s", good, crawled.size(), (good/crawled.size())));
+			FileWriter.write(stepQualityFile, true, String.format("%s/%s=%s\n", this.good, crawled.size(), (this.good/(float)crawled.size())));
 		}
 		catch ( IOException e ) {
 			Logger.error(BFSStrategy.class, "Error while writing to step quality file.", e.toString());
 		}
 	}
 
-	private Set<String> crawl(String url, Integer good) {
-		good += this.quality.get(url);
+	private Set<String> crawl(String url) {
+		Logger.info(BFSStrategy.class, url, "good: " + good);
+		this.good += this.quality.get(url);
 		return this.graph.get(url);
 	}
 }

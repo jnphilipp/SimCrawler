@@ -43,6 +43,7 @@ public interface CrawlingStrategy {
 	/**
 	 * Starts the crawling strategy.
 	 * @param urls seed URLs
+	 * @param stepQualityFile file for output step quality
 	 */
 	public void start(Collection<String> urls, String stepQualityFile);
 }

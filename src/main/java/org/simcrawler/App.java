@@ -52,11 +52,11 @@ public class App {
 			}
 		}
 		else{
-			Logger.info("input parameters:"
-					+ "\n\t-k : urls per crawling step"
+			System.out.println("usage: simcrawler -k <k> -qm <quallity mappung> -wg <web graph> -sf <seed urls> -sq <step quality>"
+					+ "\n\t-k  : urls per crawling step"
 					+ "\n\t-qm : quality mapping input file"
 					+ "\n\t-wg : web graph input file"
-					+ "\n\t-sf: seed input file"
+					+ "\n\t-sf : seed url input file"
 					+ "\n\t-sq : step quality output file");
 			System.exit(0);
 		}

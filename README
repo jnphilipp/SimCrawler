@@ -1,1 +1,12 @@
 SimCrawler
+
+usage: simcrawler -k <k> -qm <quallity mappung> -wg <web graph> -sf <seed urls> -sq <step quality>
+	-k  : urls per crawling step
+	-qm : quality mapping input file
+	-wg : web graph input file
+	-sf : seed url input file
+	-sq : step quality output file
+
+
+[Maven]
+mvn clean compile exec:java -Dexec.args="-k <k> -qm <quallity mappung> -wg <web graph> -sf <seed urls> -sq <step quality>"

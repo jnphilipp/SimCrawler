@@ -17,6 +17,12 @@ import org.simcrawler.io.FileReader;
  */
 public class WebGraphReader {
 
+	/**
+	 * load the given WEB_GRAPH file into the simulation
+	 * @param file name
+	 * @return web graph mapping
+	 * @throws IOException
+	 */
 	public static Map<String,Set<String>> read(String file) throws IOException{
 		Map<String,Set<String>> webGraph = new LinkedHashMap<>();
 		List<String[]> result = new ArrayList<>();

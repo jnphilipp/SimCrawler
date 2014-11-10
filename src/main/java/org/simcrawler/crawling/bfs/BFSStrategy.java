@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.simcrawler.Logger;
 import org.simcrawler.crawling.CrawlingStrategy;
 import org.simcrawler.io.FileWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -18,6 +20,7 @@ import org.simcrawler.io.FileWriter;
  * @version 0.0.1
  */
 public class BFSStrategy implements CrawlingStrategy {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BFSStrategy.class);
 	private int good = 0;
 	private int k;
 	private Map<String, Integer> quality;
@@ -62,12 +65,12 @@ public class BFSStrategy implements CrawlingStrategy {
 	private void doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
 		for ( int i = 0; i < this.k; i++ ) {
 			if ( queue.peek() == null ) {
-				Logger.error(BFSStrategy.class, "Empty queue aborting.");
+				LOGGER.info("Empty queue while retrieving, aborting.");
 				break;
 			}
 
 			crawled.add(queue.peek());
-			Logger.info(BFSStrategy.class, "good: " + this.good);
+			LOGGER.debug("good: " + this.good);
 			queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.crawl(queue.poll()), crawled), queue));
 		}
 
@@ -75,12 +78,11 @@ public class BFSStrategy implements CrawlingStrategy {
 			FileWriter.write(stepQualityFile, true, String.format("%s/%s=%s\n", this.good, crawled.size(), (this.good/(float)crawled.size())));
 		}
 		catch ( IOException e ) {
-			Logger.error(BFSStrategy.class, "Error while writing to step quality file.", e.toString());
+			LOGGER.error("Error while writing to step quality file.", e);
 		}
 	}
 
 	private Set<String> crawl(String url) {
-		Logger.info(BFSStrategy.class, url, "good: " + good);
 		this.good += this.quality.get(url);
 		return this.graph.get(url);
 	}

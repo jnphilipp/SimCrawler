@@ -18,10 +18,9 @@ import org.simcrawler.io.files.WebGraphReader;
  * @version 0.0.1
  */
 public class App {
-
 	public static void main(String[] args) throws IOException {
-		Logger.getInstance();
-		Logger.info("SimCrawler");
+		System.out.println("SimCrawler");
+
 		int k = 0;
 		Map<String, Integer> qualityMap = null;
 		Map<String, Set<String>> webGraph = null;

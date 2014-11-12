@@ -11,10 +11,10 @@ import java.util.Set;
  */
 public interface CrawlingStrategy {
 	/**
-	 * Sets the k.
-	 * @param k k to set
+	 * Returns the quality mapping.
+	 * @return quality mapping
 	 */
-	public void setK(int k);
+	public Map<String, Integer> getQuality();
 
 	/**
 	 * Returns web graph.
@@ -23,16 +23,10 @@ public interface CrawlingStrategy {
 	public Map<String, Set<String>> getWebGraph();
 
 	/**
-	 * Sets the web graph.
-	 * @param graph web graph to set
+	 * Sets the k.
+	 * @param k k to set
 	 */
-	public void setWebGraph(Map<String, Set<String>> graph);
-
-	/**
-	 * Returns the quality mapping.
-	 * @return quality mapping
-	 */
-	public Map<String, Integer> getQuality();
+	public void setK(int k);
 
 	/**
 	 * Sets the quality mapping.
@@ -41,9 +35,23 @@ public interface CrawlingStrategy {
 	public void setQuality(Map<String, Integer> quality);
 
 	/**
+	 * Sets the web graph.
+	 * @param graph web graph to set
+	 */
+	public void setWebGraph(Map<String, Set<String>> graph);
+
+	/**
 	 * Starts the crawling strategy.
 	 * @param urls seed URLs
 	 * @param stepQualityFile file for output step quality
 	 */
 	public void start(Collection<String> urls, String stepQualityFile);
+
+	/**
+	 * Starts the crawling strategy.
+	 * @param urls seed URLs
+	 * @param stepQualityFile file for output step quality
+	 * @param maxSteps maximum number of steps
+	 */
+	public void start(Collection<String> urls, String stepQualityFile, int maxSteps);
 }

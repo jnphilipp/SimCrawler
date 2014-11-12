@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.simcrawler.io.FileReader;
@@ -20,31 +21,33 @@ import org.simcrawler.util.Helpers;
  * @version 0.0.1
  */
 public class BFSStrategyTest {
-	private static Map<String, Integer> quality;
-	private static Map<String, Set<String>> graph;
-
 	@BeforeClass
 	public static void setUpClass() {
 		quality = new LinkedHashMap<>();
 		quality.put("a", 0);
 		quality.put("b", 1);
 		quality.put("c", 1);
-		quality.put("d", 0);
+		// quality.put("d", 0);
 
 		graph = new LinkedHashMap<>();
-		graph.put("a", new LinkedHashSet<>(Arrays.asList(new String[]{"c", "d"})));
-		graph.put("b", new LinkedHashSet<>(Arrays.asList(new String[]{"a"})));
-		graph.put("c", new LinkedHashSet<>(Arrays.asList(new String[]{"b", "d"})));
-		graph.put("d", new LinkedHashSet<>(Arrays.asList(new String[]{"b"})));
+		graph.put("a", new LinkedHashSet<>(Arrays.asList(new String[] { "c", "d" })));
+		graph.put("b", new LinkedHashSet<>(Arrays.asList(new String[] { "a" })));
+		graph.put("c", new LinkedHashSet<>(Arrays.asList(new String[] { "b", "d" })));
+		graph.put("d", new LinkedHashSet<>(Arrays.asList(new String[] { "b" })));
 	}
+
+	private static Map<String, Integer> quality;
+
+	private static Map<String, Set<String>> graph;
 
 	/**
 	 * Test of start method, of class BFSStrategy.
+	 * 
 	 * @throws java.io.IOException
 	 */
 	@Test
 	public void testStart() throws IOException {
-		Set<String> seed = new LinkedHashSet<>(Arrays.asList(new String[]{"a", "c"}));
+		Set<String> seed = new LinkedHashSet<>(Arrays.asList(new String[] { "a", "c" }));
 
 		BFSStrategy bfs = new BFSStrategy();
 		bfs.setK(1);

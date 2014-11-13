@@ -77,34 +77,26 @@ public class App {
 		System.out.println("Loading quality mapping file ...");
 		final ConcurrentNavigableMap<String, Integer> qualityMap = mapdb.getTreeMap("qualityMapping");
 		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLine() {
-			private ConcurrentNavigableMap<String, Integer> map;
-			{
-				this.map = qualityMap;
-			}
-
 			@Override
 			public void processLine(String[] columns) {
-				this.map.put(columns[0], Integer.parseInt(columns[1]));
+				qualityMap.put(columns[0], Integer.parseInt(columns[1]));
 			}
 		});
 		mapdb.commit();
+		System.out.println(qualityMap);
 
 		System.out.println("Loading web graph file ...");
 		final ConcurrentNavigableMap<String, Set<String>> webGraph = mapdb.getTreeMap("webGraph");
 		FileReader.readCSV(webGraphFile, "\t", new ReadCSVLine() {
-			private ConcurrentNavigableMap<String, Set<String>> map;
-			{
-				this.map = webGraph;
-			}
-
 			@Override
 			public void processLine(String[] columns) {
-				if ( !this.map.containsKey(columns[0]) )
-					this.map.put(columns[0], new LinkedHashSet<String>());
-				this.map.get(columns[0]).add(columns[1]);
+				if ( !webGraph.containsKey(columns[0]) )
+					webGraph.put(columns[0], new LinkedHashSet<String>());
+				webGraph.get(columns[0]).add(columns[1]);
 			}
 		});
 		mapdb.commit();
+		System.out.println(webGraph);
 
 		CrawlingStrategy crawlingStrategy = new BFSStrategy();
 		crawlingStrategy.setK(k);

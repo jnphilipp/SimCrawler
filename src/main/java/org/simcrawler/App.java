@@ -83,7 +83,6 @@ public class App {
 			}
 		});
 		mapdb.commit();
-		System.out.println(qualityMap);
 
 		System.out.println("Loading web graph file ...");
 		final ConcurrentNavigableMap<String, Set<String>> webGraph = mapdb.getTreeMap("webGraph");
@@ -96,7 +95,6 @@ public class App {
 			}
 		});
 		mapdb.commit();
-		System.out.println(webGraph);
 
 		CrawlingStrategy crawlingStrategy = new BFSStrategy();
 		crawlingStrategy.setK(k);

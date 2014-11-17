@@ -1,13 +1,11 @@
 package org.simcrawler.crawling.bfs;
 
-import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.simcrawler.crawling.AbstractCrawlingStrategy;
-import org.simcrawler.io.FileWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +18,13 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 	private static final Logger logger = LoggerFactory.getLogger(BFSStrategy.class);
 
 	private Set<String> crawl(String url) {
-		this.good += this.quality.containsKey(url) ? this.quality.get(url) : 0;
 		return this.graph.containsKey(url) ? this.graph.get(url) : new LinkedHashSet<String>();
 	}
 
 	@Override
-	protected void doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
+	protected int doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
+		int good = 0;
+
 		for ( int i = 0; i < this.k; i++ ) {
 			if ( queue.peek() == null ) {
 				logger.info("Empty queue while retrieving, aborting.");
@@ -33,15 +32,14 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 			}
 
 			crawled.add(queue.peek());
-			logger.debug("good: " + this.good);
+			good += this.evaluate(queue.peek());
 			queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.crawl(queue.poll()), crawled), queue));
 		}
 
-		try {
-			FileWriter.write(stepQualityFile, true, String.format("%s/%s=%s\n", this.good, crawled.size(), (this.good / (float) crawled.size())));
-		}
-		catch ( IOException e ) {
-			logger.error("Error while writing to step quality file.", e);
-		}
+		return good;
+	}
+
+	private int evaluate(String url) {
+		return this.quality.containsKey(url) ? this.quality.get(url) : 0;
 	}
 }

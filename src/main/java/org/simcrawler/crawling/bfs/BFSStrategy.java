@@ -87,11 +87,15 @@ public class BFSStrategy implements CrawlingStrategy {
 		Queue<String> queue = new PriorityQueue<>(urls);
 		this.good = 0;
 
-		while ( !queue.isEmpty() && maxSteps != -1 && maxSteps > 0 ) {
-			System.out.println("steps: " + maxSteps);
+		int steps = maxSteps;
+		while ( !queue.isEmpty() && steps != -1 && steps > 0 ) {
+			long time = System.currentTimeMillis();
+			int q = queue.size();
+			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s", maxSteps - steps + 1, maxSteps, queue.size(), crawled.size()));
 			this.doStep(crawled, queue, stepQualityFile);
-			if ( maxSteps != -1 )
-				maxSteps--;
+			System.out.println(String.format("new urls: %s\ntime: %s sec", Math.abs(queue.size() - q + this.k), (System.currentTimeMillis() - time) / 1000.0f));
+			if ( steps != -1 )
+				steps--;
 		}
 	}
 }

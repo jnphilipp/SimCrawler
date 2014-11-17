@@ -70,6 +70,33 @@ public class FileReader {
 	}
 
 	/**
+	 * Reads the given file as CSV and call for each line the given method.
+	 * @param file file
+	 * @param cement cement
+	 * @param method method for per line action
+	 * @throws IOException
+	 */
+	public static void readCSV(File file, String cement, ReadCSVLineWithLineNumber method) throws IOException {
+		Reader reader = null;
+		try {
+			reader = new BufferedReader(new java.io.FileReader(file));
+
+			int line = 1;
+			while ( true ) {
+				String c = ((BufferedReader) reader).readLine();
+				if ( c == null )
+					break;
+
+				method.processLine(c.split(cement), line++);
+			}
+		}
+		finally {
+			if ( reader != null )
+				reader.close();
+		}
+	}
+
+	/**
 	 * Reads the given file as CSV.
 	 * @param file file
 	 * @param csv CSV output
@@ -90,6 +117,17 @@ public class FileReader {
 	 * @throws IOException
 	 */
 	public static void readCSV(String file, String cement, ReadCSVLine method) throws IOException {
+		readCSV(new File(file), cement, method);
+	}
+
+	/**
+	 * Reads the given file as CSV and call for each line the given method.
+	 * @param file file
+	 * @param cement cement
+	 * @param method method for per line action
+	 * @throws IOException
+	 */
+	public static void readCSV(String file, String cement, ReadCSVLineWithLineNumber method) throws IOException {
 		readCSV(new File(file), cement, method);
 	}
 

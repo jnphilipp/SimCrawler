@@ -6,15 +6,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentNavigableMap;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.simcrawler.crawling.CrawlingStrategy;
 import org.simcrawler.crawling.bfs.BFSStrategy;
 import org.simcrawler.io.FileReader;
-import org.simcrawler.io.ReadCSVLine;
+import org.simcrawler.io.ReadCSVLineWithLineNumber;
 import org.simcrawler.util.Helpers;
 
 /**
@@ -23,6 +23,35 @@ import org.simcrawler.util.Helpers;
  * @version 0.0.1
  */
 public class App {
+	private static void loadFiles(String qualityMappingFile, String webGraphFile, final DB mapdb, final Map<String, Integer> qualityMap, final Map<String, Set<String>> webGraph) throws IOException {
+		System.out.println("Loading quality mapping file ...");
+		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLineWithLineNumber() {
+			@Override
+			public void processLine(String[] columns, int line) {
+				qualityMap.put(columns[0], Integer.parseInt(columns[1]));
+				if ( line % 1000000 == 0 )
+					mapdb.commit();
+			}
+		});
+		mapdb.commit();
+
+		System.out.println("Loading web graph file ...");
+		FileReader.readCSV(webGraphFile, "\t", new ReadCSVLineWithLineNumber() {
+			@Override
+			public void processLine(String[] columns, int line) {
+				if ( !webGraph.containsKey(columns[0]) )
+					webGraph.put(columns[0], new LinkedHashSet<String>());
+				webGraph.get(columns[0]).add(columns[1]);
+
+				if ( line % 1000000 == 0 )
+					mapdb.commit();
+			}
+		});
+		mapdb.commit();
+
+		System.out.println("Finished loading files.");
+	}
+
 	public static void main(String[] args) throws IOException {
 		System.out.println("SimCrawler");
 
@@ -72,30 +101,15 @@ public class App {
 			System.exit(0);
 		}
 
-		DB mapdb = DBMaker.newFileDB(new File(Helpers.getUserDir() + "/data/mapdb")).closeOnJvmShutdown().make();
+		DB mapdb = DBMaker.newFileDB(new File(Helpers.getUserDir() + "/data/mapdb")).mmapFileEnable().closeOnJvmShutdown().make();
+		Map<String, Integer> qualityMap = mapdb.getHashMap("qualityMapping");
+		Map<String, Set<String>> webGraph = mapdb.getHashMap("webGraph");
 
-		System.out.println("Loading quality mapping file ...");
-		final ConcurrentNavigableMap<String, Integer> qualityMap = mapdb.getTreeMap("qualityMapping");
-		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLine() {
-			@Override
-			public void processLine(String[] columns) {
-				qualityMap.put(columns[0], Integer.parseInt(columns[1]));
-			}
-		});
-		mapdb.commit();
+		if ( qualityMappingFile != null || webGraphFile != null ) {
+			loadFiles(qualityMappingFile, webGraphFile, mapdb, qualityMap, webGraph);
+		}
 
-		System.out.println("Loading web graph file ...");
-		final ConcurrentNavigableMap<String, Set<String>> webGraph = mapdb.getTreeMap("webGraph");
-		FileReader.readCSV(webGraphFile, "\t", new ReadCSVLine() {
-			@Override
-			public void processLine(String[] columns) {
-				if ( !webGraph.containsKey(columns[0]) )
-					webGraph.put(columns[0], new LinkedHashSet<String>());
-				webGraph.get(columns[0]).add(columns[1]);
-			}
-		});
-		mapdb.commit();
-
+		System.out.println("Start crawling ...");
 		CrawlingStrategy crawlingStrategy = new BFSStrategy();
 		crawlingStrategy.setK(k);
 		crawlingStrategy.setQuality(qualityMap);

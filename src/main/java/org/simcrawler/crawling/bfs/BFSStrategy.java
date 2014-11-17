@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class BFSStrategy extends AbstractCrawlingStrategy {
 	private static final Logger logger = LoggerFactory.getLogger(BFSStrategy.class);
 
-	private Set<String> crawl(String url) {
+	private Set<String> getLinks(String url) {
 		return this.graph.containsKey(url) ? this.graph.get(url) : new LinkedHashSet<String>();
 	}
 
@@ -33,7 +33,7 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 
 			crawled.add(queue.peek());
 			good += this.evaluate(queue.peek());
-			queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.crawl(queue.poll()), crawled), queue));
+			queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.getLinks(queue.poll()), crawled), queue));
 		}
 
 		return good;

@@ -23,6 +23,8 @@ import org.simcrawler.util.Helpers;
  * @version 0.0.1
  */
 public class App {
+	private static final File dbFile = new File(Helpers.getUserDir() + "/data/mapdb");
+
 	private static void loadFiles(String qualityMappingFile, String webGraphFile, final DB mapdb, final Map<String, Integer> qualityMap, final Map<String, Set<String>> webGraph) throws IOException {
 		System.out.println("Loading quality mapping file ...");
 		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLineWithLineNumber() {
@@ -88,20 +90,13 @@ public class App {
 				}
 			}
 		}
-		else {
-			System.out.println("usage: simcrawler -k <k> -qm <quallity mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
-					+ "\n\t-k  								 : urls per crawling step"
-					+ "\n\t-qm\n"
-					+ "\n\t--quallity_mapping  : quality mapping input file"
-					+ "\n\t-wg 								 : web graph input file"
-					+ "\n\t-sf 								 : seed url input file"
-					+ "\n\t-sq 								 : step quality output file"
-					+ "\n\t-ms\n"
-					+ "\n\t--max_steps         : maximum number of steps (optinal)");
-			System.exit(0);
-		}
+		else
+			printUsage();
 
-		DB mapdb = DBMaker.newFileDB(new File(Helpers.getUserDir() + "/data/mapdb")).mmapFileEnable().closeOnJvmShutdown().make();
+		if ( (qualityMappingFile != null || webGraphFile != null) && !dbFile.exists() || seedURLs == null )
+			printUsage();
+
+		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().make();
 		Map<String, Integer> qualityMap = mapdb.getHashMap("qualityMapping");
 		Map<String, Set<String>> webGraph = mapdb.getHashMap("webGraph");
 
@@ -115,5 +110,18 @@ public class App {
 		crawlingStrategy.setQuality(qualityMap);
 		crawlingStrategy.setWebGraph(webGraph);
 		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);
+	}
+
+	private static void printUsage() {
+		System.out.println("usage: simcrawler -k <k> -qm <quallity mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
+				+ "\n\t-k  								 : urls per crawling step"
+				+ "\n\t-qm\n"
+				+ "\n\t--quallity_mapping  : quality mapping input file"
+				+ "\n\t-wg 								 : web graph input file"
+				+ "\n\t-sf 								 : seed url input file"
+				+ "\n\t-sq 								 : step quality output file"
+				+ "\n\t-ms\n"
+				+ "\n\t--max_steps         : maximum number of steps (optinal)");
+		System.exit(0);
 	}
 }

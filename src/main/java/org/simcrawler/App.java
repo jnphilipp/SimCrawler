@@ -99,7 +99,7 @@ public class App {
 		else
 			printUsage();
 
-		if ( (qualityMappingFile != null || webGraphFile != null) && !dbFile.exists() || seedURLs == null )
+		if ( (qualityMappingFile == null || webGraphFile == null) && !dbFile.exists() || seedURLs == null )
 			printUsage();
 
 		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().make();

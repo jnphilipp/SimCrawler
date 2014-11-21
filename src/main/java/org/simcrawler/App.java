@@ -57,6 +57,9 @@ public class App {
 	public static void main(String[] args) throws IOException {
 		System.out.println("SimCrawler");
 
+		if ( !new File(dbFile.getParent()).exists() )
+			new File(dbFile.getParent()).mkdir();
+
 		int k = 0, maxSteps = -1;
 		List<String> seedURLs = null;
 		String webGraphFile = null;
@@ -75,12 +78,15 @@ public class App {
 						qualityMappingFile = it.next();
 						break;
 					case "-wg":
+					case "--web_graph":
 						webGraphFile = it.next();
 						break;
 					case "-sf":
+					case "--seed_file":
 						seedURLs = Arrays.asList(FileReader.readLines(it.next()));
 						break;
 					case "-sq":
+					case "--step_quality":
 						stepQualityFile = it.next();
 						break;
 					case "-ms":
@@ -113,15 +119,19 @@ public class App {
 	}
 
 	private static void printUsage() {
-		System.out.println("usage: simcrawler -k <k> -qm <quallity mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
-				+ "\n\t-k  								 : urls per crawling step"
-				+ "\n\t-qm\n"
-				+ "\n\t--quallity_mapping  : quality mapping input file"
-				+ "\n\t-wg 								 : web graph input file"
-				+ "\n\t-sf 								 : seed url input file"
-				+ "\n\t-sq 								 : step quality output file"
-				+ "\n\t-ms\n"
-				+ "\n\t--max_steps         : maximum number of steps (optinal)");
+		System.out.println("usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
+				+ "\n\t-k\t\t\t: urls per crawling step"
+				+ "\n\t-qm"
+				+ "\n\t--quality_mapping\t: quality mapping input file"
+				+ "\n\t-wg"
+				+ "\n\t--web_graph\t\t: web graph input file"
+				+ "\n\t-sf"
+				+ "\n\t--seed_file\t\t: seed url input file"
+				+ "\n\t-sq"
+				+ "\n\t--step_quality\t\t: step quality output file"
+				+ "\n\t-ms"
+				+ "\n\t--max_steps\t\t: maximum number of steps (optinal)"
+				+ "\n\nIf no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.");
 		System.exit(0);
 	}
 }

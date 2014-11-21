@@ -1,12 +1,20 @@
+
 SimCrawler
 
-usage: simcrawler -k <k> -qm <quallity mappung> -wg <web graph> -sf <seed urls> -sq <step quality>
-	-k  : urls per crawling step
-	-qm : quality mapping input file
-	-wg : web graph input file
-	-sf : seed url input file
-	-sq : step quality output file
+usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>
+	-k									: urls per crawling step
+	-qm
+	--quallity_mapping	: quality mapping input file
+	-wg
+	--web_graph					: web graph input file
+	-sf
+	--seed_file					: seed url input file
+	-sq
+	--step_quality			: step quality output file
+	-ms
+	--max_steps					: maximum number of steps (optinal)
 
+If no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.
 
 [Maven]
-mvn clean compile exec:java -Dexec.args="-k <k> -qm <quallity mappung> -wg <web graph> -sf <seed urls> -sq <step quality>"
+mvn clean compile exec:java -Dexec.args="-k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"

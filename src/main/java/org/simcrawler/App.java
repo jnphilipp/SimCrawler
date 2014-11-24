@@ -25,6 +25,15 @@ import org.simcrawler.util.Helpers;
 public class App {
 	private static final File dbFile = new File(Helpers.getUserDir() + "/data/mapdb");
 
+	/**
+	 * Loads the quality mapping and web graph from the given files.
+	 * @param qualityMappingFile quality mapping file
+	 * @param webGraphFile web graph file
+	 * @param mapdb map DB
+	 * @param qualityMap quality map
+	 * @param webGraph web graph
+	 * @throws IOException
+	 */
 	private static void loadFiles(String qualityMappingFile, String webGraphFile, final DB mapdb, final Map<String, Integer> qualityMap, final Map<String, Set<String>> webGraph) throws IOException {
 		System.out.println("Loading quality mapping file ...");
 		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLineWithLineNumber() {
@@ -118,6 +127,9 @@ public class App {
 		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);
 	}
 
+	/**
+	 * Prints usage.
+	 */
 	private static void printUsage() {
 		System.out.println("usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
 				+ "\n\t-k\t\t\t: urls per crawling step"

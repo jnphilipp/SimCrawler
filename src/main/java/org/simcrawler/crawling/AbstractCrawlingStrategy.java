@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Absctract class for crawling strategies.
  * @author jnphilipp
  * @version 0.0.1
  * @scince 2014-11-17

@@ -67,19 +67,17 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
 		Set<String> crawled = new LinkedHashSet<>();
 		Queue<String> queue = new PriorityQueue<>(urls);
-		int good = 0;
-		int steps = maxSteps;
-		while ( !queue.isEmpty() && steps != -1 && steps > 0 ) {
+		int good = 0, steps = 1;
+		while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) ) {
 			long time = System.currentTimeMillis();
 			int q = queue.size();
 
-			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s", maxSteps - steps + 1, maxSteps, queue.size(), crawled.size()));
+			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s", steps, maxSteps, queue.size(), crawled.size()));
 			good += this.doStep(crawled, queue, stepQualityFile);
 			this.writeStepQuality(stepQualityFile, good, crawled.size());
 			System.out.println(String.format("new urls: %s\ntime: %s sec", Math.abs(queue.size() - q + this.k), (System.currentTimeMillis() - time) / 1000.0f));
 
-			if ( steps != -1 )
-				steps--;
+			steps++;
 		}
 	}
 

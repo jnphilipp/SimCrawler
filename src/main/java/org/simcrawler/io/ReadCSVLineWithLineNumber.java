@@ -11,5 +11,5 @@ public interface ReadCSVLineWithLineNumber {
 	 * @param columns csv columns
 	 * @param line line number
 	 */
-	public void processLine(String[] columns, int line);
+	public void processLine(String[] columns, long line);
 }

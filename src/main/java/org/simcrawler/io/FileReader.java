@@ -81,7 +81,7 @@ public class FileReader {
 		try {
 			reader = new BufferedReader(new java.io.FileReader(file));
 
-			int line = 1;
+			long line = 1;
 			while ( true ) {
 				String c = ((BufferedReader) reader).readLine();
 				if ( c == null )

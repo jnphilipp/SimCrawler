@@ -38,7 +38,7 @@ public class App {
 		System.out.println("Loading quality mapping file ...");
 		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLineWithLineNumber() {
 			@Override
-			public void processLine(String[] columns, int line) {
+			public void processLine(String[] columns, long line) {
 				qualityMap.put(columns[0], Integer.parseInt(columns[1]));
 				if ( line % 1000000 == 0 )
 					mapdb.commit();
@@ -49,15 +49,17 @@ public class App {
 		System.out.println("Loading web graph file ...");
 		FileReader.readCSV(webGraphFile, "\t", new ReadCSVLineWithLineNumber() {
 			@Override
-			public void processLine(String[] columns, int line) {
+			public void processLine(String[] columns, long line) {
 				if ( !webGraph.containsKey(columns[0]) )
 					webGraph.put(columns[0], new HashSet<String>());
 				Set<String> links = webGraph.get(columns[0]);
 				links.add(columns[1]);
 				webGraph.put(columns[0], links);
 
-				if ( line % 1000000 == 0 )
+				if ( line % 1000000 == 0 ) {
 					mapdb.commit();
+					System.out.println(line);
+				}
 			}
 		});
 		mapdb.commit();

@@ -96,6 +96,7 @@ public class App {
 						break;
 					case "-sf":
 					case "--seed_file":
+						System.out.println("Loading seed file...");
 						seedURLs = Arrays.asList(FileReader.readLines(it.next()));
 						break;
 					case "-sq":
@@ -123,9 +124,9 @@ public class App {
 			loadFiles(qualityMappingFile, webGraphFile, mapdb, qualityMap, webGraph);
 
 		System.out.println("Start crawling ...");
-		CrawlingStrategy crawlingStrategy = new BFSStrategy();
+		CrawlingStrategy crawlingStrategy = new BFSStrategy(Runtime.getRuntime().availableProcessors());
 		crawlingStrategy.setK(k);
-		crawlingStrategy.setQuality(qualityMap);
+		crawlingStrategy.setQualityMap(qualityMap);
 		crawlingStrategy.setWebGraph(webGraph);
 		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);
 	}

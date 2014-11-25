@@ -96,7 +96,7 @@ public class BFSStrategyTest {
 		BFSStrategy bfs = new BFSStrategy();
 		String out = Helpers.getUserDir() + "/target/test.out";
 		bfs.setK(1);
-		bfs.setQuality(quality);
+		bfs.setQualityMap(quality);
 		bfs.setWebGraph(graph);
 		bfs.start(seed, out);
 
@@ -116,7 +116,7 @@ public class BFSStrategyTest {
 		BFSStrategy bfs = new BFSStrategy();
 		String out = Helpers.getUserDir() + "/target/test_steps.out";
 		bfs.setK(1);
-		bfs.setQuality(quality);
+		bfs.setQualityMap(quality);
 		bfs.setWebGraph(graph);
 		bfs.start(seed, out, 10);
 

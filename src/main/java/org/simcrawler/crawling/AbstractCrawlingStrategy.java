@@ -72,10 +72,9 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 			long time = System.currentTimeMillis();
 			int q = queue.size();
 
-			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s", steps, maxSteps, q, crawled.size()));
 			good += this.doStep(crawled, queue, stepQualityFile);
 			this.writeStepQuality(stepQualityFile, good, crawled.size());
-			System.out.println(String.format("new urls: %s\ntime: %s sec", Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
+			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s\nnew urls: %s\ntime: %s sec", steps, maxSteps, q, crawled.size(), Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
 
 			steps++;
 		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );

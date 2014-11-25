@@ -116,7 +116,7 @@ public class App {
 		if ( (qualityMappingFile == null || webGraphFile == null) && !dbFile.exists() || seedURLs == null )
 			printUsage();
 
-		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().cacheSize(1000000000).make();
+		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().cacheSize(200000000).make();
 		Map<String, Integer> qualityMap = mapdb.getHashMap("qualityMapping");
 		Map<String, Set<String>> webGraph = mapdb.getHashMap("webGraph");
 

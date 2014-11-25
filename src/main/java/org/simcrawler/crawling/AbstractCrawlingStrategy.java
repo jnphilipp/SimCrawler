@@ -34,7 +34,7 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	protected abstract int doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile);
 
 	@Override
-	public Map<String, Integer> getQuality() {
+	public Map<String, Integer> getQualityMap() {
 		return this.quality;
 	}
 
@@ -49,7 +49,7 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	}
 
 	@Override
-	public void setQuality(Map<String, Integer> quality) {
+	public void setQualityMap(Map<String, Integer> quality) {
 		this.quality = quality;
 	}
 
@@ -67,20 +67,18 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
 		Set<String> crawled = new HashSet<>();
 		Queue<String> queue = new PriorityQueue<>(urls);
-		int good = 0;
-		int steps = maxSteps;
-		while ( !queue.isEmpty() && steps != -1 && steps > 0 ) {
+		int good = 0, steps = 1;
+		do {
 			long time = System.currentTimeMillis();
 			int q = queue.size();
 
-			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s", maxSteps - steps + 1, maxSteps, queue.size(), crawled.size()));
+			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s", steps, maxSteps, q, crawled.size()));
 			good += this.doStep(crawled, queue, stepQualityFile);
 			this.writeStepQuality(stepQualityFile, good, crawled.size());
-			System.out.println(String.format("new urls: %s\ntime: %s sec", Math.abs(queue.size() - q + this.k), (System.currentTimeMillis() - time) / 1000.0f));
+			System.out.println(String.format("new urls: %s\ntime: %s sec", Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
 
-			if ( steps != -1 )
-				steps--;
-		}
+			steps++;
+		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );
 	}
 
 	/**

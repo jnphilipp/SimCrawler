@@ -14,7 +14,7 @@ public interface CrawlingStrategy {
 	 * Returns the quality mapping.
 	 * @return quality mapping
 	 */
-	public Map<String, Integer> getQuality();
+	public Map<String, Integer> getQualityMap();
 
 	/**
 	 * Returns web graph.
@@ -32,7 +32,7 @@ public interface CrawlingStrategy {
 	 * Sets the quality mapping.
 	 * @param quality quality mapping to set
 	 */
-	public void setQuality(Map<String, Integer> quality);
+	public void setQualityMap(Map<String, Integer> quality);
 
 	/**
 	 * Sets the web graph.

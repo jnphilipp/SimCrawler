@@ -18,7 +18,7 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 	private static final Logger logger = LoggerFactory.getLogger(BFSStrategy.class);
 
 	@Override
-	protected int doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
+	protected int crawl(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
 		int good = 0;
 
 		for ( int i = 0; i < this.k; i++ ) {
@@ -29,7 +29,11 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 
 			crawled.add(queue.peek());
 			good += this.evaluate(queue.peek());
-			queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.getLinks(queue.poll()), crawled), queue));
+			//queue.addAll(CollectionUtils.subtract(CollectionUtils.subtract(this.getLinks(queue.poll()), crawled), queue));
+			for ( String link : this.getLinks(queue.poll()) ) {
+				if ( !crawled.contains(link) && !queue.contains(link) )
+					queue.add(link);
+			}
 		}
 
 		return good;

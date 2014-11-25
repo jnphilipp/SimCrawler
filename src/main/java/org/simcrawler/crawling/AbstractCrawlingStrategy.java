@@ -2,7 +2,7 @@ package org.simcrawler.crawling;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -65,7 +65,7 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 
 	@Override
 	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
-		Set<String> crawled = new LinkedHashSet<>();
+		Set<String> crawled = new HashSet<>();
 		Queue<String> queue = new PriorityQueue<>(urls);
 		int good = 0;
 		int steps = maxSteps;

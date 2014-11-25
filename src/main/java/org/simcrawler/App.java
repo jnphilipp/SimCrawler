@@ -3,8 +3,8 @@ package org.simcrawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,8 +51,10 @@ public class App {
 			@Override
 			public void processLine(String[] columns, int line) {
 				if ( !webGraph.containsKey(columns[0]) )
-					webGraph.put(columns[0], new LinkedHashSet<String>());
-				webGraph.get(columns[0]).add(columns[1]);
+					webGraph.put(columns[0], new HashSet<String>());
+				Set<String> links = webGraph.get(columns[0]);
+				links.add(columns[1]);
+				webGraph.put(columns[0], links);
 
 				if ( line % 1000000 == 0 )
 					mapdb.commit();
@@ -111,13 +113,12 @@ public class App {
 		if ( (qualityMappingFile == null || webGraphFile == null) && !dbFile.exists() || seedURLs == null )
 			printUsage();
 
-		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().make();
+		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().cacheSize(1000000000).make();
 		Map<String, Integer> qualityMap = mapdb.getHashMap("qualityMapping");
 		Map<String, Set<String>> webGraph = mapdb.getHashMap("webGraph");
 
-		if ( qualityMappingFile != null || webGraphFile != null ) {
+		if ( qualityMappingFile != null || webGraphFile != null )
 			loadFiles(qualityMappingFile, webGraphFile, mapdb, qualityMap, webGraph);
-		}
 
 		System.out.println("Start crawling ...");
 		CrawlingStrategy crawlingStrategy = new BFSStrategy();

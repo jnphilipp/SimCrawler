@@ -7,6 +7,11 @@ package org.simcrawler.io;
  */
 public interface ReadCSVLineWithLineNumber {
 	/**
+	 * Gets called after the last line is read.
+	 */
+	public void close();
+
+	/**
 	 * The file reader will call this method for each line with the list of columns read abd the current line number.
 	 * @param columns csv columns
 	 * @param line line number

@@ -1,10 +1,8 @@
 package org.simcrawler.crawling;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
- * 
+ *
  * @author paul
  * @since 2014-11-25
  */
@@ -20,6 +18,7 @@ public class CrawlSiteImpl implements CrawlSite {
 	 * @param url URL
 	 * @return quality value
 	 */
+	@Override
 	public int evaluate(String url) {
 		Integer e = this.strategy.getQualityMap().get(url);
 		return e == null ? 0 : e;
@@ -30,8 +29,9 @@ public class CrawlSiteImpl implements CrawlSite {
 	 * @param url URL
 	 * @return links
 	 */
-	public Set<String> getLinks(String url) {
-		Set<String> links = this.strategy.getWebGraph().get(url);
-		return links == null ? new HashSet<String>() : links;
+	@Override
+	public String[] getLinks(String url) {
+		String[] links = this.strategy.getWebGraph().get(url);
+		return links == null ? new String[0] : links;
 	}
 }

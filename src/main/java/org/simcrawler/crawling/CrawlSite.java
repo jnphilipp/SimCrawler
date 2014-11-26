@@ -1,9 +1,8 @@
 package org.simcrawler.crawling;
 
-import java.util.Set;
 
 /**
- * 
+ *
  * @author paul
  * @since 2014-11-25
  */
@@ -20,5 +19,5 @@ public interface CrawlSite {
 	 * @param url URL
 	 * @return links
 	 */
-	public Set<String> getLinks(String url);
+	public String[] getLinks(String url);
 }

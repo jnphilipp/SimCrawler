@@ -2,11 +2,13 @@ package org.simcrawler.crawling;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.simcrawler.io.FileWriter;
 import org.slf4j.Logger;
@@ -22,7 +24,16 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractCrawlingStrategy.class);
 	protected int k;
 	protected Map<String, Integer> quality;
-	protected Map<String, Set<String>> graph;
+	protected Map<String, String[]> graph;
+	protected ScheduledThreadPoolExecutor executor;
+
+	public AbstractCrawlingStrategy() {
+		this.executor = new ScheduledThreadPoolExecutor(2);
+	}
+
+	public AbstractCrawlingStrategy(int threadPoolSize) {
+		this.executor = new ScheduledThreadPoolExecutor(threadPoolSize);
+	}
 
 	/**
 	 * Performs the per step actions, take k URLs, crawl and add new URLs.
@@ -39,7 +50,7 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	}
 
 	@Override
-	public Map<String, Set<String>> getWebGraph() {
+	public Map<String, String[]> getWebGraph() {
 		return this.graph;
 	}
 
@@ -50,12 +61,12 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 
 	@Override
 	public void setQualityMap(Map<String, Integer> quality) {
-		this.quality = quality;
+		this.quality = Collections.synchronizedMap(quality);
 	}
 
 	@Override
-	public void setWebGraph(Map<String, Set<String>> graph) {
-		this.graph = graph;
+	public void setWebGraph(Map<String, String[]> graph) {
+		this.graph = Collections.synchronizedMap(graph);
 	}
 
 	@Override
@@ -74,10 +85,11 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 
 			good += this.doStep(crawled, queue, stepQualityFile);
 			this.writeStepQuality(stepQualityFile, good, crawled.size());
-			System.out.println(String.format("Step %s of %s.\nQueue: %s\nCrawled: %s\nnew urls: %s\ntime: %s sec", steps, maxSteps, q, crawled.size(), Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
+			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\tnew urls: %s\ttime: %s sec", steps, maxSteps, q, crawled.size(), Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
 
 			steps++;
 		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );
+		this.executor.shutdownNow();
 	}
 
 	/**

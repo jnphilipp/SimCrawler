@@ -62,6 +62,7 @@ public class FileReader {
 
 				method.processLine(c.split(cement));
 			}
+			method.close();
 		}
 		finally {
 			if ( reader != null )
@@ -89,6 +90,7 @@ public class FileReader {
 
 				method.processLine(c.split(cement), line++);
 			}
+			method.close();
 		}
 		finally {
 			if ( reader != null )

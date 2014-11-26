@@ -2,7 +2,6 @@ package org.simcrawler.crawling;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
 /**
  *
@@ -20,7 +19,7 @@ public interface CrawlingStrategy {
 	 * Returns web graph.
 	 * @return web graph
 	 */
-	public Map<String, Set<String>> getWebGraph();
+	public Map<String, String[]> getWebGraph();
 
 	/**
 	 * Sets the k.
@@ -38,7 +37,7 @@ public interface CrawlingStrategy {
 	 * Sets the web graph.
 	 * @param graph web graph to set
 	 */
-	public void setWebGraph(Map<String, Set<String>> graph);
+	public void setWebGraph(Map<String, String[]> graph);
 
 	/**
 	 * Starts the crawling strategy.

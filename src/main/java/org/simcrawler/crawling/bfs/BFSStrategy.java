@@ -1,15 +1,13 @@
 package org.simcrawler.crawling.bfs;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.simcrawler.crawling.AbstractCrawlingStrategy;
 import org.simcrawler.crawling.CrawlSiteImpl;
@@ -23,38 +21,19 @@ import org.slf4j.LoggerFactory;
  */
 public class BFSStrategy extends AbstractCrawlingStrategy {
 	private static final Logger logger = LoggerFactory.getLogger(BFSStrategy.class);
-	private ScheduledThreadPoolExecutor executor;
 
 	public BFSStrategy() {
 		super();
-		this.executor = new ScheduledThreadPoolExecutor(4);
 	}
 
 	public BFSStrategy(int threadPoolSize) {
-		super();
-		this.executor = new ScheduledThreadPoolExecutor(threadPoolSize);
+		super(threadPoolSize);
 	}
 
-	@Override
-	public void setQualityMap(Map<String, Integer> quality) {
-		this.quality = Collections.synchronizedMap(quality);
-	}
-
-	@Override
-	public void setWebGraph(Map<String, Set<String>> graph) {
-		this.graph = Collections.synchronizedMap(graph);
-	}
-
-	@Override
-	public void start(Collection<String> urls, String stepQualityFile) {
-		super.start(urls, stepQualityFile);
-		this.executor.shutdownNow();
-	}
-
-	@Override
-	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
-		super.start(urls, stepQualityFile, maxSteps);
-		this.executor.shutdownNow();
+	private void addNewURLs(Queue<String> queue, Set<String> crawled, Set<String> newURLs) {
+		for ( String link : newURLs )
+			if ( !crawled.contains(link) && !queue.contains(link) )
+				queue.add(link);
 	}
 
 	@Override
@@ -73,7 +52,7 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 			futures.add(this.executor.submit(new Callable<Integer>() {
 				@Override
 				public Integer call() throws Exception {
-					newURLs.addAll(crawler.getLinks(url));
+					newURLs.addAll(Arrays.asList(crawler.getLinks(url)));
 					return crawler.evaluate(url);
 				}
 			}));
@@ -82,12 +61,6 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		int good = this.sum(futures);
 		this.addNewURLs(queue, crawled, newURLs);
 		return good;
-	}
-
-	private void addNewURLs(Queue<String> queue, Set<String> crawled, Set<String> newURLs) {
-		for ( String link : newURLs )
-			if ( !crawled.contains(link) && !queue.contains(link) )
-				queue.add(link);
 	}
 
 	/**
@@ -101,11 +74,11 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		int result = 0;
 		for ( Future<Integer> future : futures )
 			try {
-				result += (int)future.get();
+				result += future.get();
 			}
-			catch (InterruptedException | ExecutionException e) {
-				logger.error("Error while summing futures.", e);
-			}
+		catch ( InterruptedException | ExecutionException e ) {
+			logger.error("Error while summing futures.", e);
+		}
 		return result;
 	}
 }

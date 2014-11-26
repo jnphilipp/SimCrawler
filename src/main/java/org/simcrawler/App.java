@@ -34,9 +34,12 @@ public class App {
 	 * @param webGraph web graph
 	 * @throws IOException
 	 */
-	private static void loadFiles(String qualityMappingFile, String webGraphFile, final DB mapdb, final Map<String, Integer> qualityMap, final Map<String, Set<String>> webGraph) throws IOException {
+	private static void loadFiles(String qualityMappingFile, String webGraphFile, final DB mapdb, final Map<String, Integer> qualityMap, final Map<String, String[]> webGraph) throws IOException {
 		System.out.println("Loading quality mapping file ...");
 		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLineWithLineNumber() {
+			@Override
+			public void close() {}
+
 			@Override
 			public void processLine(String[] columns, long line) {
 				qualityMap.put(columns[0], Integer.parseInt(columns[1]));
@@ -48,18 +51,34 @@ public class App {
 
 		System.out.println("Loading web graph file ...");
 		FileReader.readCSV(webGraphFile, "\t", new ReadCSVLineWithLineNumber() {
+			private String key = "";
+			private Set<String> links = new HashSet<>();
+
+			@Override
+			public void close() {
+				webGraph.put(this.key, this.links.toArray(new String[this.links.size()]));
+				mapdb.commit();
+			}
+
 			@Override
 			public void processLine(String[] columns, long line) {
-				if ( !webGraph.containsKey(columns[0]) )
-					webGraph.put(columns[0], new HashSet<String>());
-				Set<String> links = webGraph.get(columns[0]);
-				links.add(columns[1]);
-				webGraph.put(columns[0], links);
-
-				if ( line % 1000000 == 0 ) {
-					mapdb.commit();
-					System.out.println(line);
+				if ( this.key.isEmpty() ) {
+					this.key = columns[0];
+					this.links.add(columns[1]);
+					return;
 				}
+
+				if ( this.key.equals(columns[0]) )
+					this.links.add(columns[1]);
+				else {
+					webGraph.put(this.key, this.links.toArray(new String[this.links.size()]));
+					this.key = columns[0];
+					this.links.clear();
+					this.links.add(columns[1]);
+				}
+
+				if ( line % 1000000 == 0 )
+					mapdb.commit();
 			}
 		});
 		mapdb.commit();
@@ -118,7 +137,7 @@ public class App {
 
 		DB mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().cacheSize(200000000).make();
 		Map<String, Integer> qualityMap = mapdb.getHashMap("qualityMapping");
-		Map<String, Set<String>> webGraph = mapdb.getHashMap("webGraph");
+		Map<String, String[]> webGraph = mapdb.getHashMap("webGraph");
 
 		if ( qualityMappingFile != null || webGraphFile != null )
 			loadFiles(qualityMappingFile, webGraphFile, mapdb, qualityMap, webGraph);

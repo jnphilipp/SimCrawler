@@ -21,6 +21,10 @@ import org.simcrawler.util.Helpers;
  * @version 0.0.1
  */
 public class BFSStrategyTest {
+	private static Map<String, Integer> quality;
+
+	private static Map<String, String[]> graph;
+
 	@BeforeClass
 	public static void setUpClass() {
 		quality = new HashMap<>();
@@ -52,41 +56,37 @@ public class BFSStrategyTest {
 		quality.put("z", 1);
 
 		graph = new HashMap<>();
-		graph.put("a", new HashSet<>(Arrays.asList(new String[] { "c", "d", "h" })));
-		graph.put("b", new HashSet<>(Arrays.asList(new String[] { "a", "j", "z" })));
-		graph.put("c", new HashSet<>(Arrays.asList(new String[] { "b", "d", "l", "m", "o" })));
-		graph.put("d", new HashSet<>(Arrays.asList(new String[] { "b", "d", "f", "q" })));
-		graph.put("e", new HashSet<>(Arrays.asList(new String[] { "t", "m", "c" })));
-		graph.put("f", new HashSet<>(Arrays.asList(new String[] { "y", "o" })));
-		graph.put("g", new HashSet<>(Arrays.asList(new String[] { "x", "l", "l", "d" })));
-		graph.put("h", new HashSet<>(Arrays.asList(new String[] { "w", "d" })));
-		graph.put("i", new HashSet<>(Arrays.asList(new String[] { "l", "e" })));
-		graph.put("j", new HashSet<>(Arrays.asList(new String[] { "f", "k" })));
-		graph.put("k", new HashSet<>(Arrays.asList(new String[] { "d", "l" })));
-		graph.put("l", new HashSet<>(Arrays.asList(new String[] { "s", "z" })));
-		graph.put("m", new HashSet<>(Arrays.asList(new String[] { "c", "i" })));
-		graph.put("n", new HashSet<>(Arrays.asList(new String[] { "p", "j" })));
-		graph.put("o", new HashSet<>(Arrays.asList(new String[] { "b", "a" })));
-		graph.put("p", new HashSet<>(Arrays.asList(new String[] { "c", "u" })));
-		graph.put("q", new HashSet<>(Arrays.asList(new String[] { "u", "d", "m" })));
-		graph.put("r", new HashSet<>(Arrays.asList(new String[] { "r", "c" })));
-		graph.put("s", new HashSet<>(Arrays.asList(new String[] { "h", "v" })));
-		graph.put("t", new HashSet<>(Arrays.asList(new String[] { "w", "v" })));
-		graph.put("u", new HashSet<>(Arrays.asList(new String[] { "q", "q" })));
-		graph.put("v", new HashSet<>(Arrays.asList(new String[] { "o", "i" })));
-		graph.put("w", new HashSet<>(Arrays.asList(new String[] { "k", "g", "e", "l" })));
-		graph.put("x", new HashSet<>(Arrays.asList(new String[] { "l", "l" })));
-		graph.put("y", new HashSet<>(Arrays.asList(new String[] { "s", "s" })));
-		graph.put("z", new HashSet<>(Arrays.asList(new String[] { "m", "d", "s" })));
+		graph.put("a", new String[] { "c", "d", "h" });
+		graph.put("b", new String[] { "a", "j", "z" });
+		graph.put("c", new String[] { "b", "d", "l", "m", "o" });
+		graph.put("d", new String[] { "b", "d", "f", "q" });
+		graph.put("e", new String[] { "t", "m", "c" });
+		graph.put("f", new String[] { "y", "o" });
+		graph.put("g", new String[] { "x", "l", "l", "d" });
+		graph.put("h", new String[] { "w", "d" });
+		graph.put("i", new String[] { "l", "e" });
+		graph.put("j", new String[] { "f", "k" });
+		graph.put("k", new String[] { "d", "l" });
+		graph.put("l", new String[] { "s", "z" });
+		graph.put("m", new String[] { "c", "i" });
+		graph.put("n", new String[] { "p", "j" });
+		graph.put("o", new String[] { "b", "a" });
+		graph.put("p", new String[] { "c", "u" });
+		graph.put("q", new String[] { "u", "d", "m" });
+		graph.put("r", new String[] { "r", "c" });
+		graph.put("s", new String[] { "h", "v" });
+		graph.put("t", new String[] { "w", "v" });
+		graph.put("u", new String[] { "q", "q" });
+		graph.put("v", new String[] { "o", "i" });
+		graph.put("w", new String[] { "k", "g", "e", "l" });
+		graph.put("x", new String[] { "l", "l" });
+		graph.put("y", new String[] { "s", "s" });
+		graph.put("z", new String[] { "m", "d", "s" });
 	}
-
-	private static Map<String, Integer> quality;
-
-	private static Map<String, Set<String>> graph;
 
 	/**
 	 * Test of start method, of class BFSStrategy.
-	 * 
+	 *
 	 * @throws java.io.IOException
 	 */
 	@Test
@@ -106,7 +106,7 @@ public class BFSStrategyTest {
 
 	/**
 	 * Test of start method, of class BFSStrategy.
-	 * 
+	 *
 	 * @throws java.io.IOException
 	 */
 	@Test

@@ -3,11 +3,13 @@ package org.simcrawler.crawling;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.simcrawler.io.FileWriter;
@@ -42,7 +44,7 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	 * @param stepQualityFile step quality file
 	 * @return good URLs crawled in this step
 	 */
-	protected abstract int doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile);
+	protected abstract int doStep(Set<String> crawled, Queue<URL> queue, String stepQualityFile);
 
 	@Override
 	public Map<String, Integer> getQualityMap() {
@@ -77,7 +79,7 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 	@Override
 	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
 		Set<String> crawled = new HashSet<>();
-		Queue<String> queue = new PriorityQueue<>(urls);
+		Queue<URL> queue = new ConcurrentLinkedQueue<>(URL.fromCollection(urls));
 		int good = 0, steps = 1;
 		do {
 			long time = System.currentTimeMillis();

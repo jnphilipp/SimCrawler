@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 
 import org.simcrawler.crawling.AbstractCrawlingStrategy;
 import org.simcrawler.crawling.CrawlSiteImpl;
+import org.simcrawler.crawling.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +31,16 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		super(threadPoolSize);
 	}
 
-	private void addNewURLs(Queue<String> queue, Set<String> crawled, Set<String> newURLs) {
+	private void addNewURLs(Queue<URL> queue, Set<String> crawled, Set<String> newURLs) {
 		for ( String link : newURLs )
 			if ( !crawled.contains(link) && !queue.contains(link) )
-				queue.add(link);
+				queue.add(new URL(link));
 	}
 
 	@Override
-	protected int doStep(Set<String> crawled, Queue<String> queue, String stepQualityFile) {
+	protected int doStep(Set<String> crawled, Queue<URL> queue, String stepQualityFile) {
 		Set<Future<Integer>> futures = new HashSet<>();
+		final CrawlSiteImpl crawler = new CrawlSiteImpl(this);
 		final Set<String> newURLs = Collections.synchronizedSet(new HashSet<String>());
 		for ( int i = 0; i < this.k; i++ ) {
 			if ( queue.peek() == null ) {
@@ -46,14 +48,14 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 				break;
 			}
 
-			crawled.add(queue.peek());
-			final CrawlSiteImpl crawler = new CrawlSiteImpl(this);
-			final String url = queue.poll();
+			final URL url = queue.poll();
+			System.out.print(url);
+			crawled.add(url.getUrl());
 			futures.add(this.executor.submit(new Callable<Integer>() {
 				@Override
 				public Integer call() throws Exception {
-					newURLs.addAll(Arrays.asList(crawler.getLinks(url)));
-					return crawler.evaluate(url);
+					newURLs.addAll(Arrays.asList(crawler.getLinks(url.getUrl())));
+					return crawler.evaluate(url.getUrl());
 				}
 			}));
 		}

@@ -7,6 +7,7 @@ import org.simcrawler.crawling.AbstractCrawlingStrategy;
 import org.simcrawler.crawling.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * max page priority strategy
  * @author proewer
@@ -21,8 +22,8 @@ public class MPPStrategy extends AbstractCrawlingStrategy {
 	}
 
 	@Override
-	protected int doStep(Set<String> crawled, Queue<URL> queue, String stepQualityFile) {
+	protected int[] doStep(Queue<URL> queue, Set<String> seen, String stepQualityFile) {
 		// TODO Auto-generated method stub
-		return 0;
+		return new int[0];
 	}
 }

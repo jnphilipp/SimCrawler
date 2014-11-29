@@ -3,13 +3,11 @@ package org.simcrawler.crawling;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.simcrawler.io.FileWriter;
@@ -39,12 +37,12 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 
 	/**
 	 * Performs the per step actions, take k URLs, crawl and add new URLs.
-	 * @param crawled crawled URLs
 	 * @param queue queue for URLs
+	 * @param crawled crawled URLs
 	 * @param stepQualityFile step quality file
 	 * @return good URLs crawled in this step
 	 */
-	protected abstract int doStep(Set<String> crawled, Queue<URL> queue, String stepQualityFile);
+	protected abstract int[] doStep(Queue<URL> queue, Set<String> crawled, String stepQualityFile);
 
 	@Override
 	public Map<String, Integer> getQualityMap() {
@@ -78,16 +76,18 @@ public abstract class AbstractCrawlingStrategy implements CrawlingStrategy {
 
 	@Override
 	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
-		Set<String> crawled = new HashSet<>();
-		Queue<URL> queue = new ConcurrentLinkedQueue<>(URL.fromCollection(urls));
-		int good = 0, steps = 1;
+		Set<String> seen = new LinkedHashSet<>(urls);
+		Queue<URL> queue = new LinkedList<>(URL.fromCollection(urls));
+		int good = 0, crawled = 0, steps = 1;
 		do {
 			long time = System.currentTimeMillis();
 			int q = queue.size();
 
-			good += this.doStep(crawled, queue, stepQualityFile);
-			this.writeStepQuality(stepQualityFile, good, crawled.size());
-			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\tnew urls: %s\ttime: %s sec", steps, maxSteps, q, crawled.size(), Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
+			int[] r = this.doStep(queue, seen, stepQualityFile);
+			good += r[0];
+			crawled += r[1];
+			this.writeStepQuality(stepQualityFile, good, crawled);
+			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\tnew urls: %s\ttime: %s sec", steps, maxSteps, queue.size(), crawled, Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
 
 			steps++;
 		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );

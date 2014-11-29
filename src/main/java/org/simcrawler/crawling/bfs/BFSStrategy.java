@@ -3,6 +3,7 @@ package org.simcrawler.crawling.bfs;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -31,14 +32,18 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		super(threadPoolSize);
 	}
 
-	private void addNewURLs(Queue<URL> queue, Set<String> crawled, Set<String> newURLs) {
+	private Set<URL> addNewURLs(Set<String> seen, Set<String> newURLs) {
+		Set<URL> toAdd = new LinkedHashSet<>();
 		for ( String link : newURLs )
-			if ( !crawled.contains(link) && !queue.contains(link) )
-				queue.add(new URL(link));
+			if ( !seen.contains(link) )
+				toAdd.add(new URL(link));
+		seen.addAll(newURLs);
+		return toAdd;
 	}
 
 	@Override
-	protected int doStep(Set<String> crawled, Queue<URL> queue, String stepQualityFile) {
+	protected int[] doStep(Queue<URL> queue, Set<String> seen, String stepQualityFile) {
+		int crawled = 0;
 		Set<Future<Integer>> futures = new HashSet<>();
 		final CrawlSiteImpl crawler = new CrawlSiteImpl(this);
 		final Set<String> newURLs = Collections.synchronizedSet(new HashSet<String>());
@@ -49,8 +54,7 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 			}
 
 			final URL url = queue.poll();
-			System.out.print(url);
-			crawled.add(url.getUrl());
+			crawled++;
 			futures.add(this.executor.submit(new Callable<Integer>() {
 				@Override
 				public Integer call() throws Exception {
@@ -61,8 +65,8 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		}
 
 		int good = this.sum(futures);
-		this.addNewURLs(queue, crawled, newURLs);
-		return good;
+		queue.addAll(this.addNewURLs(seen, newURLs));
+		return new int[] { good, crawled };
 	}
 
 	/**

@@ -3,7 +3,7 @@ package org.simcrawler.crawling;
 
 /**
  *
- * @author paul
+ * @author proewer
  * @since 2014-11-25
  */
 public class CrawlSiteImpl implements CrawlSite {

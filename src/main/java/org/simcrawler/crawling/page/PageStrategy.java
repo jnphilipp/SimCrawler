@@ -1,4 +1,4 @@
-package org.simcrawler.page;
+package org.simcrawler.crawling.page;
 
 import java.util.Set;
 

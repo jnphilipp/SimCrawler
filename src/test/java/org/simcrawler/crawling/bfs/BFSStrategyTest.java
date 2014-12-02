@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +27,7 @@ public class BFSStrategyTest {
 
 	@BeforeClass
 	public static void setUpClass() {
-		quality = new HashMap<>();
+		quality = new LinkedHashMap<>();
 		quality.put("a", 0);
 		quality.put("b", 1);
 		quality.put("c", 1);
@@ -55,7 +55,7 @@ public class BFSStrategyTest {
 		quality.put("y", 0);
 		quality.put("z", 1);
 
-		graph = new HashMap<>();
+		graph = new LinkedHashMap<>();
 		graph.put("a", new String[] { "c", "d", "h" });
 		graph.put("b", new String[] { "a", "j", "z" });
 		graph.put("c", new String[] { "b", "d", "l", "m", "o" });

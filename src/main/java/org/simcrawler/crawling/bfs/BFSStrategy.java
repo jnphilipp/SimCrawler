@@ -2,7 +2,6 @@ package org.simcrawler.crawling.bfs;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Queue;
 import java.util.Set;
@@ -44,9 +43,9 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 	@Override
 	protected int[] doStep(Queue<URL> queue, Set<String> seen, String stepQualityFile) {
 		int crawled = 0;
-		Set<Future<Integer>> futures = new HashSet<>();
+		Set<Future<Integer>> futures = new LinkedHashSet<>();
 		final CrawlSiteImpl crawler = new CrawlSiteImpl(this);
-		final Set<String> newURLs = Collections.synchronizedSet(new HashSet<String>());
+		final Set<String> newURLs = Collections.synchronizedSet(new LinkedHashSet<String>());
 		for ( int i = 0; i < this.k; i++ ) {
 			if ( queue.peek() == null ) {
 				logger.info("Empty queue while retrieving, ending step.");

@@ -11,8 +11,9 @@ import java.util.Set;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.simcrawler.crawling.CrawlingStrategy;
-import org.simcrawler.crawling.bfs.BFSStrategy;
+import org.simcrawler.crawling.page.BackLinkStrategy;
+import org.simcrawler.crawling.site.SiteStrategy;
+import org.simcrawler.crawling.site.rrs.RRStrategy;
 import org.simcrawler.io.FileReader;
 import org.simcrawler.io.ReadCSVLineWithLineNumber;
 import org.simcrawler.util.Helpers;
@@ -144,11 +145,18 @@ public class App {
 			loadFiles(qualityMappingFile, webGraphFile, mapdb, qualityMap, webGraph);
 
 		System.out.println("Start crawling ...");
-		CrawlingStrategy crawlingStrategy = new BFSStrategy(Runtime.getRuntime().availableProcessors());
+		/*CrawlingStrategy crawlingStrategy = new BFSStrategy(Runtime.getRuntime().availableProcessors());
 		crawlingStrategy.setK(k);
 		crawlingStrategy.setQualityMap(qualityMap);
 		crawlingStrategy.setWebGraph(webGraph);
-		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);
+		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);*/
+
+		SiteStrategy siteStrategy = new RRStrategy(Runtime.getRuntime().availableProcessors());
+		siteStrategy.setK(k);
+		siteStrategy.setQualityMap(qualityMap);
+		siteStrategy.setWebGraph(webGraph);
+		siteStrategy.setPageStrategy(new BackLinkStrategy(siteStrategy, 100));
+		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);
 	}
 
 	/**

@@ -5,7 +5,7 @@ package org.simcrawler.crawling.site;
 
 import org.simcrawler.crawling.CrawlSite;
 import org.simcrawler.crawling.CrawlingStrategy;
-import org.simcrawler.page.PageStrategy;
+import org.simcrawler.crawling.page.PageStrategy;
 
 /**
  * @author jnphilipp

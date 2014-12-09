@@ -1,6 +1,5 @@
 package org.simcrawler.crawling.page;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -11,7 +10,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.simcrawler.crawling.site.SiteStrategy;
-import org.simcrawler.util.Helpers;
 
 /**
  *
@@ -21,7 +19,7 @@ import org.simcrawler.util.Helpers;
 public class BackLinkStrategy implements PageStrategy {
 
 	//private DB mapdb;
-	private static final File dbFile = new File(Helpers.getUserDir() + "/data/backLink");
+	//private static final File dbFile = new File(Helpers.getUserDir() + "/data/backLink");
 	private Map<String, Integer> backLinkCount;
 	private Map<String, Integer> batchSizeSiteCount;
 	private SiteStrategy siteStrategy;
@@ -41,14 +39,11 @@ public class BackLinkStrategy implements PageStrategy {
 	public void close() {
 		//this.mapdb.close();
 		//this.mapdb.delete("BackLinkCountMapping");
-		dbFile.delete();
+		//dbFile.delete();
 	}
 
 	@Override
 	public Queue<String> crawl(String site, Queue<String> queue, Set<String> seen) {
-		if ( queue == null )
-			return null;
-
 		//sort
 		List<String> sorted = new LinkedList<>(queue);
 		Integer bsc = this.batchSizeSiteCount.get(site);

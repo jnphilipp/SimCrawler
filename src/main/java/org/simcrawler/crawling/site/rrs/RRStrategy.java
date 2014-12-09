@@ -74,12 +74,11 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 
 			for ( int i = 0; i < this.k; i++ ) {
 				crawled++;
+				final String site = queue.poll();
 				futures.add(this.executor.submit(new Callable<Integer>() {
 					@Override
 					public Integer call() throws Exception {
-						String site = queue.poll();
 						Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
-						queue.add(site);
 
 						if ( q == null )
 							return 0;
@@ -91,6 +90,7 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 						return crawlSite.evaluate(page);
 					}
 				}));
+				queue.add(site);
 			}
 
 			good += this.sum(futures);

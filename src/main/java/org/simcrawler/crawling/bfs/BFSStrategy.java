@@ -31,7 +31,7 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		super(threadPoolSize);
 	}
 
-	private Set<URL> addNewURLs(Set<String> seen, Set<String> newURLs) {
+	private Set<URL> getURLsToAdd(Set<String> seen, Set<String> newURLs) {
 		Set<URL> toAdd = new LinkedHashSet<>();
 		for ( String link : newURLs )
 			if ( !seen.contains(link) )
@@ -64,7 +64,7 @@ public class BFSStrategy extends AbstractCrawlingStrategy {
 		}
 
 		int good = this.sum(futures);
-		queue.addAll(this.addNewURLs(seen, newURLs));
+		queue.addAll(this.getURLsToAdd(seen, newURLs));
 		return new int[] { good, crawled };
 	}
 

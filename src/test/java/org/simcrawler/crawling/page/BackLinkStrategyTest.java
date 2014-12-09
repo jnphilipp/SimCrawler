@@ -9,7 +9,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -124,9 +127,17 @@ public class BackLinkStrategyTest {
 		siteStrategy.setWebGraph(graph);
 		siteStrategy.setPageStrategy(bls);
 
-		String page = bls.crawl("http://a.de", new LinkedHashSet<>(Arrays.asList(new String[] { "http://a.de/5" })));
+		Set<String> seen = new LinkedHashSet<>();
+
+		Queue<String> queue = new LinkedList<>(Arrays.asList(new String[] { "http://a.de/5" }));
+		queue = bls.crawl("http://a.de", queue, seen);
+		String page = queue.poll();
 		assertEquals("http://a.de/5", page);
-		page = bls.crawl("http://a.de", new LinkedHashSet<>(Arrays.asList(graph.get(page))));
+		seen.add(page);
+		queue = new LinkedList<>(Arrays.asList(graph.get(page.toString())));
+		queue = bls.crawl("http://a.de", queue, seen);
+		page = queue.poll();
+		seen.add(page);
 		assertEquals("http://a.de/7", page);
 	}
 }

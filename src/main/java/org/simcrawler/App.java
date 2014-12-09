@@ -155,7 +155,7 @@ public class App {
 		siteStrategy.setK(k);
 		siteStrategy.setQualityMap(qualityMap);
 		siteStrategy.setWebGraph(webGraph);
-		siteStrategy.setPageStrategy(new BackLinkStrategy(siteStrategy, 100));
+		siteStrategy.setPageStrategy(new BackLinkStrategy(siteStrategy, 500));
 		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);
 	}
 

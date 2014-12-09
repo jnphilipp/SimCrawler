@@ -34,31 +34,25 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 		super(threadPoolSize);
 	}
 
-	private void addNewURLs(Map<String, Set<String>> sites, Set<String> seen, Set<String> newURLs) {
+	private Map<String, Queue<String>> fillSites(Collection<String> urls) {
+		Map<String, Queue<String>> sites = new LinkedHashMap<>();
+		for ( String url : urls ) {
+			String site = this.getSite(url);
+			if ( !sites.containsKey(site) )
+				sites.put(site, new LinkedList<String>());
+			sites.get(site).add(url);
+		}
+
+		return sites;
+	}
+
+	private Set<String> getURLsToAdd(Set<String> seen, Set<String> newURLs) {
 		Set<String> toAdd = new LinkedHashSet<>();
 		for ( String link : newURLs )
 			if ( !seen.contains(link) )
 				toAdd.add(link);
 		seen.addAll(newURLs);
-
-		for ( String page : toAdd ) {
-			String site = this.getSite(page);
-			if ( !sites.containsKey(site) )
-				sites.put(site, new LinkedHashSet<String>());
-			sites.get(site).add(page);
-		}
-	}
-
-	private Map<String, Set<String>> fillSites(Collection<String> urls) {
-		Map<String, Set<String>> sites = new LinkedHashMap<>();
-		for ( String url : urls ) {
-			String site = this.getSite(url);
-			if ( !sites.containsKey(site) )
-				sites.put(site, new LinkedHashSet<String>());
-			sites.get(site).add(url);
-		}
-
-		return sites;
+		return toAdd;
 	}
 
 	@Override
@@ -68,8 +62,8 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 
 	@Override
 	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
-		Set<String> seen = new LinkedHashSet<>(urls);
-		final Map<String, Set<String>> sites = this.fillSites(urls);
+		final Set<String> seen = Collections.synchronizedSet(new LinkedHashSet<>(urls));
+		final Map<String, Queue<String>> sites = this.fillSites(urls);
 		final Queue<String> queue = new LinkedList<>(sites.keySet());
 		int good = 0, crawled = 0, steps = 1;
 
@@ -84,11 +78,14 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 					@Override
 					public Integer call() throws Exception {
 						String site = queue.poll();
-						String page = pageStrategy.crawl(site, sites.get(site));
+						Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
 						queue.add(site);
 
-						if ( page == null )
+						if ( q == null )
 							return 0;
+
+						String page = q.poll();
+						sites.put(site, q);
 
 						newURLs.addAll(Arrays.asList(crawlSite.getLinks(page)));
 						return crawlSite.evaluate(page);
@@ -97,7 +94,14 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 			}
 
 			good += this.sum(futures);
-			this.addNewURLs(sites, seen, newURLs);
+			for ( String page : this.getURLsToAdd(seen, newURLs) ) {
+				String site = this.getSite(page);
+				Queue<String> q = sites.get(site);
+				if ( q == null )
+					q = new LinkedList<>();
+				q.add(page);
+				sites.put(site, q);
+			}
 
 			this.writeStepQuality(stepQualityFile, good, crawled);
 			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\ttime: %s sec", steps, maxSteps, queue.size(), crawled, (System.currentTimeMillis() - time) / 1000.0f));

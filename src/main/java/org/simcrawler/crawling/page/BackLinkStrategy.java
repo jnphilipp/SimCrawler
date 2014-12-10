@@ -52,15 +52,15 @@ public class BackLinkStrategy implements PageStrategy {
 		queue = new LinkedList<>(sorted);
 
 		//update db
-		if ( !this.batchSizeSiteCount.containsKey(site) )
-			this.batchSizeSiteCount.put(site, 0);
 		for ( String url : this.siteStrategy.getCrawlSite().getLinks(queue.peek()) ) {
 			if ( !this.backLinkCount.containsKey(url) )
 				this.backLinkCount.put(url, 0);
 			this.backLinkCount.put(url, this.backLinkCount.get(url) + 1);
 
-			if ( url.startsWith(site) )
-				this.batchSizeSiteCount.put(site, this.batchSizeSiteCount.get(site) + 1);
+			String s = this.siteStrategy.getSite(url);
+			if ( !this.batchSizeSiteCount.containsKey(s) )
+				this.batchSizeSiteCount.put(s, 0);
+			this.batchSizeSiteCount.put(s, this.batchSizeSiteCount.get(s) + 1);
 		}
 
 		return queue;

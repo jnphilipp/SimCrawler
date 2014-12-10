@@ -49,7 +49,8 @@ public abstract class AbstractSiteCrawlingStrategy implements SiteStrategy {
 		return this.quality;
 	}
 
-	protected String getSite(String url) {
+	@Override
+	public String getSite(String url) {
 		Matcher m = Pattern.compile("(http://.+?\\.[^/]+)/").matcher(url);
 		return m.find() ? m.group(1) : "";
 	}

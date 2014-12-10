@@ -15,5 +15,7 @@ import org.simcrawler.crawling.page.PageStrategy;
 public interface SiteStrategy extends CrawlingStrategy {
 	public CrawlSite getCrawlSite();
 
+	public String getSite(String url);
+
 	public void setPageStrategy(PageStrategy pageStrategy);
 }

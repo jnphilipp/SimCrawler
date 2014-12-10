@@ -34,10 +34,9 @@ public class OPICStrategy implements PageStrategy {
 	@Override
 	public Queue<String> crawl(String site, Queue<String> queue, Set<String> seen) {
 		//update history
-		for ( String page : queue ) {
-			Double score = this.opicHistory.get(page);
-			this.opicHistory.put(page, (score == null ? 0 : score) + 1.0 / queue.size());
-		}
+		double score = 1.0f / this.siteStrategy.getCrawlSite().getLinks(queue.peek()).length;
+		for ( String page : queue )
+			this.opicHistory.put(page, (this.opicHistory.containsKey(page) ? this.opicHistory.get(page) : 0) + score);
 
 		//sort query
 		List<String> sorted = new LinkedList<>(queue);
@@ -46,11 +45,7 @@ public class OPICStrategy implements PageStrategy {
 			Collections.sort(sorted, new Comparator<String>() {
 				@Override
 				public int compare(String arg0, String arg1) {
-					Double darg0 = opicHistory.get(arg0);
-					Double darg1 = opicHistory.get(arg1);
-					darg0 = darg0 == null ? 0 : darg0;
-					darg1 = darg1 == null ? 0 : darg1;
-					return darg0.compareTo(darg1);
+					return Double.compare(opicHistory.containsKey(arg0) ? opicHistory.get(arg0) : 0, opicHistory.containsKey(arg1) ? opicHistory.get(arg1) : 0);
 				}
 			});
 
@@ -59,14 +54,20 @@ public class OPICStrategy implements PageStrategy {
 
 		//crawl
 		queue = new LinkedList<>(sorted);
-		bsc = this.batchSizeSiteCount.get(site);
-		this.batchSizeSiteCount.put(site, (bsc == null ? 0 : bsc) + 1);
+
+		//update db
+		if ( !this.batchSizeSiteCount.containsKey(site) )
+			this.batchSizeSiteCount.put(site, 0);
+		for ( String url : this.siteStrategy.getCrawlSite().getLinks(queue.peek()) ) {
+			if ( url.startsWith(site) )
+				this.batchSizeSiteCount.put(site, this.batchSizeSiteCount.get(site) + 1);
+		}
+
 		return queue;
 	}
 
 	@Override
 	public double getMaxPage(String site) {
-		Double i = this.siteMaxScore.get(site);
-		return i == null ? 0 : i;
+		return this.siteMaxScore.containsKey(site) ? this.siteMaxScore.get(site) : 0;
 	}
 }

@@ -41,11 +41,7 @@ public class BackLinkStrategy implements PageStrategy {
 			Collections.sort(sorted, new Comparator<String>() {
 				@Override
 				public int compare(String arg0, String arg1) {
-					Integer t = backLinkCount.get(arg0);
-					int barg0 = t == null ? 0 : t;
-					t = backLinkCount.get(arg1);
-					int barg1 = t == null ? 0 : t;
-					return Integer.compare(barg0, barg1);
+					return Integer.compare(backLinkCount.containsKey(arg0) ? backLinkCount.get(arg0) : 0, backLinkCount.containsKey(arg1) ? backLinkCount.get(arg1) : 0);
 				}
 			});
 
@@ -54,18 +50,17 @@ public class BackLinkStrategy implements PageStrategy {
 
 		//crawl
 		queue = new LinkedList<>(sorted);
-		String[] newURLs = this.siteStrategy.getCrawlSite().getLinks(queue.peek());
 
 		//update db
-		bsc = this.batchSizeSiteCount.get(site);
-		this.batchSizeSiteCount.put(site, (bsc == null ? 0 : bsc) + 1);
-		for ( String url : newURLs ) {
-			if ( seen.contains(url) )
-				this.backLinkCount.remove(url);
-			else {
-				Integer blc = this.backLinkCount.get(url);
-				this.backLinkCount.put(url, (blc == null ? 0 : blc) + 1);
-			}
+		if ( !this.batchSizeSiteCount.containsKey(site) )
+			this.batchSizeSiteCount.put(site, 0);
+		for ( String url : this.siteStrategy.getCrawlSite().getLinks(queue.peek()) ) {
+			if ( !this.backLinkCount.containsKey(url) )
+				this.backLinkCount.put(url, 0);
+			this.backLinkCount.put(url, this.backLinkCount.get(url) + 1);
+
+			if ( url.startsWith(site) )
+				this.batchSizeSiteCount.put(site, this.batchSizeSiteCount.get(site) + 1);
 		}
 
 		return queue;
@@ -73,7 +68,6 @@ public class BackLinkStrategy implements PageStrategy {
 
 	@Override
 	public double getMaxPage(String site) {
-		Integer i = this.siteMaxBackLinkCount.get(site);
-		return i == null ? 0 : i;
+		return this.siteMaxBackLinkCount.containsKey(site) ? this.siteMaxBackLinkCount.get(site) : 0;
 	}
 }

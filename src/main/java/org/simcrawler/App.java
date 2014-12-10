@@ -2,12 +2,11 @@ package org.simcrawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
@@ -53,7 +52,7 @@ public class App {
 		System.out.println("Loading web graph file ...");
 		FileReader.readCSV(webGraphFile, "\t", new ReadCSVLineWithLineNumber() {
 			private String key = "";
-			private Set<String> links = new HashSet<>();
+			private List<String> links = new ArrayList<>();
 
 			@Override
 			public void close() {
@@ -155,7 +154,7 @@ public class App {
 		siteStrategy.setK(k);
 		siteStrategy.setQualityMap(qualityMap);
 		siteStrategy.setWebGraph(webGraph);
-		siteStrategy.setPageStrategy(new BackLinkStrategy(siteStrategy, 500));
+		siteStrategy.setPageStrategy(new OPICStrategy(siteStrategy, 100));
 		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);*/
 
 		SiteStrategy siteStrategy = new MPPStrategy(Runtime.getRuntime().availableProcessors());

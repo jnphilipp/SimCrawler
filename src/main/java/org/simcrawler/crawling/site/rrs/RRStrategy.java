@@ -74,22 +74,24 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 
 			for ( int i = 0; i < this.k; i++ ) {
 				crawled++;
+				queueSize--;
 				final String site = queue.poll();
-				futures.add(this.executor.submit(new Callable<Integer>() {
-					@Override
-					public Integer call() throws Exception {
-						Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
+				if ( sites.get(site).size() != 0 )
+					futures.add(this.executor.submit(new Callable<Integer>() {
+						@Override
+						public Integer call() throws Exception {
+							Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
 
-						if ( q == null )
-							return 0;
+							if ( q == null )
+								return 0;
 
-						String page = q.poll();
-						sites.put(site, q);
+							String page = q.poll();
+							sites.put(site, q);
 
-						newURLs.addAll(Arrays.asList(crawlSite.getLinks(page)));
-						return crawlSite.evaluate(page);
-					}
-				}));
+							newURLs.addAll(Arrays.asList(crawlSite.getLinks(page)));
+							return crawlSite.evaluate(page);
+						}
+					}));
 				queue.add(site);
 			}
 

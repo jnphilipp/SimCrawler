@@ -66,13 +66,6 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 		final Set<String> seen = Collections.synchronizedSet(new LinkedHashSet<>(urls));
 		final Map<String, Queue<String>> sites = this.fillSites(urls);
 		final Queue<String> queue = new LinkedList<>(sites.keySet());
-		/*final Queue<String> queue = new PriorityQueue<String>(sites.keySet().size(), new Comparator<String>() {
-			@Override
-			public int compare(String arg0, String arg1) {
-				return Double.compare(pageStrategy.getMaxPage(arg0), pageStrategy.getMaxPage(arg1));
-			}
-		});
-		queue.addAll(sites.keySet());*/
 		int good = 0, crawled = 0, queueSize = urls.size(), steps = 1;
 
 		do {
@@ -82,22 +75,24 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 
 			for ( int i = 0; i < this.k; i++ ) {
 				crawled++;
+				queueSize--;
 				final String site = queue.poll();
-				futures.add(this.executor.submit(new Callable<Integer>() {
-					@Override
-					public Integer call() throws Exception {
-						Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
+				if ( sites.get(site).size() != 0 )
+					futures.add(this.executor.submit(new Callable<Integer>() {
+						@Override
+						public Integer call() throws Exception {
+							Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
 
-						if ( q == null )
-							return 0;
+							if ( q == null )
+								return 0;
 
-						String page = q.poll();
-						sites.put(site, q);
+							String page = q.poll();
+							sites.put(site, q);
 
-						newURLs.addAll(Arrays.asList(crawlSite.getLinks(page)));
-						return crawlSite.evaluate(page);
-					}
-				}));
+							newURLs.addAll(Arrays.asList(crawlSite.getLinks(page)));
+							return crawlSite.evaluate(page);
+						}
+					}));
 				queue.add(site);
 			}
 
@@ -143,9 +138,9 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 			try {
 				result += future.get();
 			}
-		catch ( InterruptedException | ExecutionException e ) {
-			logger.error("Error while summing futures.", e);
-		}
+			catch ( InterruptedException | ExecutionException e ) {
+				logger.error("Error while summing futures.", e);
+			}
 		return result;
 	}
 }

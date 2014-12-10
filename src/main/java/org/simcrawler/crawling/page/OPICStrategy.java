@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 import org.simcrawler.crawling.site.SiteStrategy;
 
@@ -32,7 +31,7 @@ public class OPICStrategy implements PageStrategy {
 	}
 
 	@Override
-	public Queue<String> crawl(String site, Queue<String> queue, Set<String> seen) {
+	public Queue<String> crawl(String site, Queue<String> queue) {
 		//update history
 		double score = 1.0f / this.siteStrategy.getCrawlSite().getLinks(queue.peek()).length;
 		for ( String page : queue )

@@ -1,7 +1,6 @@
 package org.simcrawler.crawling.page;
 
 import java.util.Queue;
-import java.util.Set;
 
 /**
  *
@@ -15,7 +14,7 @@ public interface PageStrategy {
 	 * @param queue queue with pages of the given site
 	 * @return reordert queue
 	 */
-	public Queue<String> crawl(String site, Queue<String> queue, Set<String> seen);
+	public Queue<String> crawl(String site, Queue<String> queue);
 
 	public double getMaxPage(String site);
 }

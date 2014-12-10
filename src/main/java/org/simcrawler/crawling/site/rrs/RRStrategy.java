@@ -3,19 +3,15 @@ package org.simcrawler.crawling.site.rrs;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.simcrawler.crawling.site.AbstractSiteCrawlingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Round Robin crawling strategy.
@@ -24,35 +20,12 @@ import org.slf4j.LoggerFactory;
  * @scince 2014-12-02
  */
 public class RRStrategy extends AbstractSiteCrawlingStrategy {
-	private static final Logger logger = LoggerFactory.getLogger(RRStrategy.class);
-
 	public RRStrategy() {
 		super();
 	}
 
 	public RRStrategy(int threadPoolSize) {
 		super(threadPoolSize);
-	}
-
-	private Map<String, Queue<String>> fillSites(Collection<String> urls) {
-		Map<String, Queue<String>> sites = new LinkedHashMap<>();
-		for ( String url : urls ) {
-			String site = this.getSite(url);
-			if ( !sites.containsKey(site) )
-				sites.put(site, new LinkedList<String>());
-			sites.get(site).add(url);
-		}
-
-		return sites;
-	}
-
-	private Set<String> getURLsToAdd(Set<String> seen, Set<String> newURLs) {
-		Set<String> toAdd = new LinkedHashSet<>();
-		for ( String link : newURLs )
-			if ( !seen.contains(link) )
-				toAdd.add(link);
-		seen.addAll(newURLs);
-		return toAdd;
 	}
 
 	@Override
@@ -80,7 +53,7 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 					futures.add(this.executor.submit(new Callable<Integer>() {
 						@Override
 						public Integer call() throws Exception {
-							Queue<String> q = pageStrategy.crawl(site, sites.get(site), seen);
+							Queue<String> q = pageStrategy.crawl(site, sites.get(site));
 
 							if ( q == null )
 								return 0;
@@ -112,24 +85,5 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 			steps++;
 		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );
 		this.executor.shutdownNow();
-	}
-
-	/**
-	 * Sums the return values of the futures.
-	 * @param crawled crawled sites
-	 * @param queue queue
-	 * @param futures futures
-	 * @return sum of good sites
-	 */
-	private int sum(Set<Future<Integer>> futures) {
-		int result = 0;
-		for ( Future<Integer> future : futures )
-			try {
-				result += future.get();
-			}
-			catch ( InterruptedException | ExecutionException e ) {
-				logger.error("Error while summing futures.", e);
-			}
-		return result;
 	}
 }

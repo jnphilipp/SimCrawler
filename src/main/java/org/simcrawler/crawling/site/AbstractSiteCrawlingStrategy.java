@@ -1,8 +1,16 @@
 package org.simcrawler.crawling.site;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +47,18 @@ public abstract class AbstractSiteCrawlingStrategy implements SiteStrategy {
 		this.crawlSite = new CrawlSiteImpl(this);
 	}
 
+	protected Map<String, Queue<String>> fillSites(Collection<String> urls) {
+		Map<String, Queue<String>> sites = new LinkedHashMap<>();
+		for ( String url : urls ) {
+			String site = this.getSite(url);
+			if ( !sites.containsKey(site) )
+				sites.put(site, new LinkedList<String>());
+			sites.get(site).add(url);
+		}
+
+		return sites;
+	}
+
 	@Override
 	public CrawlSite getCrawlSite() {
 		return this.crawlSite;
@@ -53,6 +73,15 @@ public abstract class AbstractSiteCrawlingStrategy implements SiteStrategy {
 	public String getSite(String url) {
 		Matcher m = Pattern.compile("(http://.+?\\.[^/]+)/").matcher(url);
 		return m.find() ? m.group(1) : "";
+	}
+
+	protected Set<String> getURLsToAdd(Set<String> seen, Set<String> newURLs) {
+		Set<String> toAdd = new LinkedHashSet<>();
+		for ( String link : newURLs )
+			if ( !seen.contains(link) )
+				toAdd.add(link);
+		seen.addAll(newURLs);
+		return toAdd;
 	}
 
 	@Override
@@ -80,36 +109,24 @@ public abstract class AbstractSiteCrawlingStrategy implements SiteStrategy {
 		this.graph = Collections.synchronizedMap(graph);
 	}
 
-	/*@Override
-	public abstract void start(Collection<String> urls, String stepQualityFile);
-
-	@Override
-	public abstract void start(Collection<String> urls, String stepQualityFile, int maxSteps);*/
-
-	/*@Override
-	public void start(Collection<String> urls, String stepQualityFile) {
-		this.start(urls, stepQualityFile, -1);
+	/**
+	 * Sums the return values of the futures.
+	 * @param crawled crawled sites
+	 * @param queue queue
+	 * @param futures futures
+	 * @return sum of good sites
+	 */
+	protected int sum(Set<Future<Integer>> futures) {
+		int result = 0;
+		for ( Future<Integer> future : futures )
+			try {
+				result += future.get();
+			}
+			catch ( InterruptedException | ExecutionException e ) {
+				logger.error("Error while summing futures.", e);
+			}
+		return result;
 	}
-
-	@Override
-	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
-		Set<String> seen = new LinkedHashSet<>(urls);
-		/*Queue<String> queue = new LinkedList<>(URL.fromCollection(urls));
-		int good = 0, crawled = 0, steps = 1;
-		do {
-			long time = System.currentTimeMillis();
-			int q = queue.size();
-
-			int[] r = this.doStep(queue, seen, stepQualityFile);
-			good += r[0];
-			crawled += r[1];
-			this.writeStepQuality(stepQualityFile, good, crawled);
-			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\tnew urls: %s\ttime: %s sec", steps, maxSteps, queue.size(), crawled, Math.abs(queue.size() - q + Math.min(this.k, q)), (System.currentTimeMillis() - time) / 1000.0f));
-
-			steps++;
-		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );
-		this.executor.shutdownNow();
-	}*/
 
 	/**
 	 * Writes to the step quality file.

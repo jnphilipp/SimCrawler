@@ -11,9 +11,9 @@ import java.util.Set;
 
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.simcrawler.crawling.page.BackLinkStrategy;
+import org.simcrawler.crawling.page.OPICStrategy;
 import org.simcrawler.crawling.site.SiteStrategy;
-import org.simcrawler.crawling.site.rrs.RRStrategy;
+import org.simcrawler.crawling.site.mpp.MPPStrategy;
 import org.simcrawler.io.FileReader;
 import org.simcrawler.io.ReadCSVLineWithLineNumber;
 import org.simcrawler.util.Helpers;
@@ -151,11 +151,18 @@ public class App {
 		crawlingStrategy.setWebGraph(webGraph);
 		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);*/
 
-		SiteStrategy siteStrategy = new RRStrategy(Runtime.getRuntime().availableProcessors());
+		/*SiteStrategy siteStrategy = new RRStrategy(Runtime.getRuntime().availableProcessors());
 		siteStrategy.setK(k);
 		siteStrategy.setQualityMap(qualityMap);
 		siteStrategy.setWebGraph(webGraph);
 		siteStrategy.setPageStrategy(new BackLinkStrategy(siteStrategy, 500));
+		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);*/
+
+		SiteStrategy siteStrategy = new MPPStrategy(Runtime.getRuntime().availableProcessors());
+		siteStrategy.setK(k);
+		siteStrategy.setQualityMap(qualityMap);
+		siteStrategy.setWebGraph(webGraph);
+		siteStrategy.setPageStrategy(new OPICStrategy(siteStrategy, 100));
 		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);
 	}
 

@@ -1,8 +1,9 @@
-package org.simcrawler.crawling.site.rrs;
+package org.simcrawler.crawling.site.mpp;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -18,19 +19,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Round Robin crawling strategy.
+ * Max page priority crawling strategy.
  * @author jnphilipp
  * @version 0.0.1
  * @scince 2014-12-02
  */
-public class RRStrategy extends AbstractSiteCrawlingStrategy {
-	private static final Logger logger = LoggerFactory.getLogger(RRStrategy.class);
+public class MPPStrategy extends AbstractSiteCrawlingStrategy {
+	private static final Logger logger = LoggerFactory.getLogger(MPPStrategy.class);
 
-	public RRStrategy() {
+	public MPPStrategy() {
 		super();
 	}
 
-	public RRStrategy(int threadPoolSize) {
+	public MPPStrategy(int threadPoolSize) {
 		super(threadPoolSize);
 	}
 
@@ -65,6 +66,13 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 		final Set<String> seen = Collections.synchronizedSet(new LinkedHashSet<>(urls));
 		final Map<String, Queue<String>> sites = this.fillSites(urls);
 		final Queue<String> queue = new LinkedList<>(sites.keySet());
+		/*final Queue<String> queue = new PriorityQueue<String>(sites.keySet().size(), new Comparator<String>() {
+			@Override
+			public int compare(String arg0, String arg1) {
+				return Double.compare(pageStrategy.getMaxPage(arg0), pageStrategy.getMaxPage(arg1));
+			}
+		});
+		queue.addAll(sites.keySet());*/
 		int good = 0, crawled = 0, queueSize = urls.size(), steps = 1;
 
 		do {
@@ -105,6 +113,16 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 				sites.put(site, q);
 			}
 
+			String[] sorted = queue.toArray(new String[queue.size()]);
+			Arrays.sort(sorted, new Comparator<String>() {
+				@Override
+				public int compare(String o1, String o2) {
+					return Double.compare(pageStrategy.getMaxPage(o1), pageStrategy.getMaxPage(o2));
+				}
+			});
+			queue.clear();
+			queue.addAll(new LinkedList<>(Arrays.asList(sorted)));
+
 			this.writeStepQuality(stepQualityFile, good, crawled);
 			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\ttime: %s sec", steps, maxSteps, queueSize, crawled, (System.currentTimeMillis() - time) / 1000.0f));
 			steps++;
@@ -125,9 +143,9 @@ public class RRStrategy extends AbstractSiteCrawlingStrategy {
 			try {
 				result += future.get();
 			}
-			catch ( InterruptedException | ExecutionException e ) {
-				logger.error("Error while summing futures.", e);
-			}
+		catch ( InterruptedException | ExecutionException e ) {
+			logger.error("Error while summing futures.", e);
+		}
 		return result;
 	}
 }

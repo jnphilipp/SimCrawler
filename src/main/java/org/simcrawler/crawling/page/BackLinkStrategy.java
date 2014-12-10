@@ -13,33 +13,22 @@ import org.simcrawler.crawling.site.SiteStrategy;
 
 /**
  *
- * @author proewer
+ * @author proewer, jnphilipp
  * @since 2014-12-02
  */
 public class BackLinkStrategy implements PageStrategy {
-
-	//private DB mapdb;
-	//private static final File dbFile = new File(Helpers.getUserDir() + "/data/backLink");
+	private int batchSize;
+	private SiteStrategy siteStrategy;
 	private Map<String, Integer> backLinkCount;
 	private Map<String, Integer> batchSizeSiteCount;
-	private SiteStrategy siteStrategy;
-	private int batchSize;
+	private Map<String, Integer> siteMaxBackLinkCount;
 
 	public BackLinkStrategy(SiteStrategy siteStrategy, int batchSize) {
-		/*this.mapdb = DBMaker.newFileDB(dbFile).mmapFileEnable().closeOnJvmShutdown().cacheSize(200000000).make();
-		this.backLinkCount = this.mapdb.getHashMap("BackLinkCountMapping");
-		this.backLinkSiteCount = this.mapdb.getHashMap("BackLinkSiteCountMapping");*/
-		this.backLinkCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
-		this.batchSizeSiteCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
 		this.siteStrategy = siteStrategy;
 		this.batchSize = batchSize;
-	}
-
-	@Override
-	public void close() {
-		//this.mapdb.close();
-		//this.mapdb.delete("BackLinkCountMapping");
-		//dbFile.delete();
+		this.backLinkCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
+		this.batchSizeSiteCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
+		this.siteMaxBackLinkCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
 	}
 
 	@Override
@@ -59,15 +48,15 @@ public class BackLinkStrategy implements PageStrategy {
 					return Integer.compare(barg0, barg1);
 				}
 			});
+
+			this.siteMaxBackLinkCount.put(site, this.backLinkCount.get(sorted.get(0)));
 		}
 
 		//crawl
 		queue = new LinkedList<>(sorted);
-		String crawledURL = queue.peek();
-		//pages = Collections.synchronizedSet(new LinkedHashSet<>(queue));
-		String[] newURLs = this.siteStrategy.getCrawlSite().getLinks(crawledURL);
-		//update db
+		String[] newURLs = this.siteStrategy.getCrawlSite().getLinks(queue.peek());
 
+		//update db
 		bsc = this.batchSizeSiteCount.get(site);
 		this.batchSizeSiteCount.put(site, (bsc == null ? 0 : bsc) + 1);
 		for ( String url : newURLs ) {
@@ -80,5 +69,11 @@ public class BackLinkStrategy implements PageStrategy {
 		}
 
 		return queue;
+	}
+
+	@Override
+	public double getMaxPage(String site) {
+		Integer i = this.siteMaxBackLinkCount.get(site);
+		return i == null ? 0 : i;
 	}
 }

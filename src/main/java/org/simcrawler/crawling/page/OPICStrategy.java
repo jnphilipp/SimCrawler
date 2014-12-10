@@ -13,52 +13,39 @@ import org.simcrawler.crawling.site.SiteStrategy;
 
 /**
  *
- * @author proewer
+ * @author proewer, jnphilipp
  * @since 2014-12-02
  */
 public class OPICStrategy implements PageStrategy {
-
-	private Map<String, Double> opicHistory;
-	//private int sumScoreHistory;
-	private Map<String, Integer> batchSizeSiteCount;
-	private SiteStrategy siteStrategy;
 	private int batchSize;
+	private SiteStrategy siteStrategy;
+	private Map<String, Double> opicHistory;
+	private Map<String, Integer> batchSizeSiteCount;
+	private Map<String, Double> siteMaxScore;
 
 	public OPICStrategy(SiteStrategy siteStrategy, int batchSize) {
 		this.siteStrategy = siteStrategy;
 		this.batchSize = batchSize;
-		//this.sumScoreHistory = 0;
-		this.batchSizeSiteCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
 		this.opicHistory = Collections.synchronizedMap(new LinkedHashMap<String, Double>());
+		this.batchSizeSiteCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
+		this.siteMaxScore = Collections.synchronizedMap(new LinkedHashMap<String, Double>());
 	}
 
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-	}
-
-	/*private void updateScore() {
-		for (Map.Entry<String, Double> entry : this.opicHistory.entrySet())
-			this.sumScoreHistory+=entry.getValue();
-	}*/
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Queue<String> crawl(String site, Queue<String> queue, Set<String> seen) {
-
 		//update history
 		for ( String page : queue ) {
 			Double score = this.opicHistory.get(page);
 			this.opicHistory.put(page, (score == null ? 0 : score) + 1.0 / queue.size());
 		}
-		//updateScore();
-		List<String> sorted = new LinkedList<>(queue);
+
 		//sort query
+		List<String> sorted = new LinkedList<>(queue);
 		Integer bsc = this.batchSizeSiteCount.get(site);
 		if ( (bsc == null ? 0 : bsc) >= this.batchSize ) {
-			Collections.sort(sorted, new Comparator() {
+			Collections.sort(sorted, new Comparator<String>() {
 				@Override
-				public int compare(Object arg0, Object arg1) {
+				public int compare(String arg0, String arg1) {
 					Double darg0 = opicHistory.get(arg0);
 					Double darg1 = opicHistory.get(arg1);
 					darg0 = darg0 == null ? 0 : darg0;
@@ -66,20 +53,20 @@ public class OPICStrategy implements PageStrategy {
 					return darg0.compareTo(darg1);
 				}
 			});
+
+			this.siteMaxScore.put(site, this.opicHistory.get(sorted.get(0)));
 		}
+
 		//crawl
 		queue = new LinkedList<>(sorted);
-		//String crawledURL = queue.peek();
-		//String[] newURLs = this.siteStrategy.getCrawlSite().getLinks(crawledURL);
-		//update crawled pages counter
 		bsc = this.batchSizeSiteCount.get(site);
 		this.batchSizeSiteCount.put(site, (bsc == null ? 0 : bsc) + 1);
-		/*this.batchSize -= newURLs.length;
-		if ( this.batchSize <= 0 ) {
-			this.batchSize *= -1;
-			this.sortFlag = true;
-		}*/
-		//return crawled URL
 		return queue;
+	}
+
+	@Override
+	public double getMaxPage(String site) {
+		Double i = this.siteMaxScore.get(site);
+		return i == null ? 0 : i;
 	}
 }

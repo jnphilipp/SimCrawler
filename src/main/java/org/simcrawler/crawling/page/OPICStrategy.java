@@ -45,7 +45,7 @@ public class OPICStrategy implements PageStrategy {
 			Collections.sort(sorted, new Comparator<String>() {
 				@Override
 				public int compare(String arg0, String arg1) {
-					return Double.compare(opicHistory.containsKey(arg0) ? opicHistory.get(arg0) : 0, opicHistory.containsKey(arg1) ? opicHistory.get(arg1) : 0);
+					return Double.compare(opicHistory.containsKey(arg1) ? opicHistory.get(arg1) : 0, opicHistory.containsKey(arg0) ? opicHistory.get(arg0) : 0);
 				}
 			});
 

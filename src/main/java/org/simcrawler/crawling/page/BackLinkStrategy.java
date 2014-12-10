@@ -41,7 +41,7 @@ public class BackLinkStrategy implements PageStrategy {
 			Collections.sort(sorted, new Comparator<String>() {
 				@Override
 				public int compare(String arg0, String arg1) {
-					return Integer.compare(backLinkCount.containsKey(arg0) ? backLinkCount.get(arg0) : 0, backLinkCount.containsKey(arg1) ? backLinkCount.get(arg1) : 0);
+					return Integer.compare(backLinkCount.containsKey(arg1) ? backLinkCount.get(arg1) : 0, backLinkCount.containsKey(arg0) ? backLinkCount.get(arg0) : 0);
 				}
 			});
 

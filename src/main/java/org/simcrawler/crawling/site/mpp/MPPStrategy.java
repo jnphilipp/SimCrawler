@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -108,15 +109,15 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 				sites.put(site, q);
 			}
 
-			String[] sorted = queue.toArray(new String[queue.size()]);
-			Arrays.sort(sorted, new Comparator<String>() {
+			List<String> sorted = new LinkedList<>(queue);
+			Collections.sort(sorted, new Comparator<String>() {
 				@Override
 				public int compare(String o1, String o2) {
-					return Double.compare(pageStrategy.getMaxPage(o1), pageStrategy.getMaxPage(o2));
+					return Double.compare(pageStrategy.getMaxPage(o2), pageStrategy.getMaxPage(o1));
 				}
 			});
 			queue.clear();
-			queue.addAll(new LinkedList<>(Arrays.asList(sorted)));
+			queue.addAll(sorted);
 
 			this.writeStepQuality(stepQualityFile, good, crawled);
 			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\ttime: %s sec", steps, maxSteps, queueSize, crawled, (System.currentTimeMillis() - time) / 1000.0f));

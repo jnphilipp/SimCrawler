@@ -7,12 +7,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
-import org.simcrawler.crawling.page.OPICStrategy;
+import org.simcrawler.crawling.CrawlingStrategy;
+import org.simcrawler.crawling.bfs.BFSStrategy;
+import org.simcrawler.crawling.page.bl.BacklinkStrategy;
+import org.simcrawler.crawling.page.opic.OPICStrategy;
 import org.simcrawler.crawling.site.SiteStrategy;
 import org.simcrawler.crawling.site.mpp.MPPStrategy;
+import org.simcrawler.crawling.site.rrs.RRStrategy;
 import org.simcrawler.io.FileReader;
 import org.simcrawler.io.ReadCSVLineWithLineNumber;
 import org.simcrawler.util.Helpers;
@@ -27,6 +30,7 @@ public class App {
 
 	/**
 	 * Loads the quality mapping and web graph from the given files.
+	 *
 	 * @param qualityMappingFile quality mapping file
 	 * @param webGraphFile web graph file
 	 * @param mapdb map DB
@@ -38,7 +42,8 @@ public class App {
 		System.out.println("Loading quality mapping file ...");
 		FileReader.readCSV(qualityMappingFile, " ", new ReadCSVLineWithLineNumber() {
 			@Override
-			public void close() {}
+			public void close() {
+			}
 
 			@Override
 			public void processLine(String[] columns, long line) {
@@ -92,15 +97,21 @@ public class App {
 		if ( !new File(dbFile.getParent()).exists() )
 			new File(dbFile.getParent()).mkdir();
 
-		int k = 0, maxSteps = -1;
+		int k = 0, maxSteps = -1, batchSize = 1;
 		List<String> seedURLs = null;
 		String webGraphFile = null;
 		String qualityMappingFile = null;
 		String stepQualityFile = null;
+
+		boolean roundRobin = false;
+		boolean maxPagePriority = false;
+		boolean backlink = false;
+		boolean opic = false;
+
 		if ( args.length != 0 ) {
 			List<String> l = Arrays.asList(args);
 			Iterator<String> it = l.iterator();
-			while ( it.hasNext() ) {
+			while ( it.hasNext() )
 				switch ( it.next() ) {
 					case "-k":
 						k = Integer.parseInt(it.next());
@@ -116,7 +127,7 @@ public class App {
 					case "-sf":
 					case "--seed_file":
 						System.out.println("Loading seed file...");
-						seedURLs = Arrays.asList(FileReader.readLines(it.next()));
+						seedURLs = FileReader.readLines(it.next());
 						break;
 					case "-sq":
 					case "--step_quality":
@@ -126,8 +137,30 @@ public class App {
 					case "--max_steps":
 						maxSteps = Integer.parseInt(it.next());
 						break;
+					case "-rr":
+					case "--raound_robin":
+						roundRobin = true;
+						maxPagePriority = false;
+						break;
+					case "-mpp":
+					case "--max_page_priority":
+						maxPagePriority = true;
+						roundRobin = false;
+						break;
+					case "-bl":
+					case "--backlink":
+						backlink = true;
+						opic = false;
+						break;
+					case "-opic":
+						opic = true;
+						backlink = false;
+						break;
+					case "-b":
+					case "--batch_size":
+						batchSize = Integer.parseInt(it.next());
+						break;
 				}
-			}
 		}
 		else
 			printUsage();
@@ -144,25 +177,31 @@ public class App {
 			loadFiles(qualityMappingFile, webGraphFile, mapdb, qualityMap, webGraph);
 
 		System.out.println("Start crawling ...");
-		/*CrawlingStrategy crawlingStrategy = new BFSStrategy(Runtime.getRuntime().availableProcessors());
+
+		CrawlingStrategy crawlingStrategy;
+		if ( roundRobin )
+			crawlingStrategy = new RRStrategy(Runtime.getRuntime().availableProcessors());
+		else if ( maxPagePriority )
+			crawlingStrategy = new MPPStrategy(Runtime.getRuntime().availableProcessors());
+		else
+			crawlingStrategy = new BFSStrategy(Runtime.getRuntime().availableProcessors());
+
 		crawlingStrategy.setK(k);
 		crawlingStrategy.setQualityMap(qualityMap);
 		crawlingStrategy.setWebGraph(webGraph);
-		crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);*/
 
-		/*SiteStrategy siteStrategy = new RRStrategy(Runtime.getRuntime().availableProcessors());
-		siteStrategy.setK(k);
-		siteStrategy.setQualityMap(qualityMap);
-		siteStrategy.setWebGraph(webGraph);
-		siteStrategy.setPageStrategy(new OPICStrategy(siteStrategy, 500));
-		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);*/
+		if ( crawlingStrategy instanceof SiteStrategy )
+			if ( backlink )
+				((SiteStrategy) crawlingStrategy).setPageStrategy(new BacklinkStrategy((SiteStrategy) crawlingStrategy, batchSize));
+			else if ( opic )
+				((SiteStrategy) crawlingStrategy).setPageStrategy(new OPICStrategy((SiteStrategy) crawlingStrategy, batchSize));
+			else
+				crawlingStrategy = null;
 
-		SiteStrategy siteStrategy = new MPPStrategy(Runtime.getRuntime().availableProcessors());
-		siteStrategy.setK(k);
-		siteStrategy.setQualityMap(qualityMap);
-		siteStrategy.setWebGraph(webGraph);
-		siteStrategy.setPageStrategy(new OPICStrategy(siteStrategy, 100));
-		siteStrategy.start(seedURLs, stepQualityFile, maxSteps);
+		if ( crawlingStrategy != null )
+			crawlingStrategy.start(seedURLs, stepQualityFile, maxSteps);
+		else
+			System.out.println("Invalid configuration, aborting.");
 	}
 
 	/**
@@ -170,18 +209,18 @@ public class App {
 	 */
 	private static void printUsage() {
 		System.out.println("usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
-				+ "\n\t-k\t\t\t: urls per crawling step"
-				+ "\n\t-qm"
-				+ "\n\t--quality_mapping\t: quality mapping input file"
-				+ "\n\t-wg"
-				+ "\n\t--web_graph\t\t: web graph input file"
-				+ "\n\t-sf"
-				+ "\n\t--seed_file\t\t: seed url input file"
-				+ "\n\t-sq"
-				+ "\n\t--step_quality\t\t: step quality output file"
-				+ "\n\t-ms"
-				+ "\n\t--max_steps\t\t: maximum number of steps (optinal)"
-				+ "\n\nIf no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.");
+						+ "\n\t-k\t\t\t: urls per crawling step"
+						+ "\n\t-qm"
+						+ "\n\t--quality_mapping\t: quality mapping input file"
+						+ "\n\t-wg"
+						+ "\n\t--web_graph\t\t: web graph input file"
+						+ "\n\t-sf"
+						+ "\n\t--seed_file\t\t: seed url input file"
+						+ "\n\t-sq"
+						+ "\n\t--step_quality\t\t: step quality output file"
+						+ "\n\t-ms"
+						+ "\n\t--max_steps\t\t: maximum number of steps (optinal)"
+						+ "\n\nIf no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.");
 		System.exit(0);
 	}
 }

@@ -3,28 +3,27 @@
  */
 package org.simcrawler.crawling.page;
 
-import static org.junit.Assert.assertEquals;
-
+import org.simcrawler.crawling.page.bl.BacklinkStrategy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.simcrawler.crawling.site.AbstractSiteCrawlingStrategy;
 import org.simcrawler.crawling.site.SiteStrategy;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author jnphilipp
  * @version 0.0.1
  * @scince Dec 2, 2014
  */
-public class BackLinkStrategyTest {
+public class BacklinkStrategyTest {
+
 	private static Map<String, Integer> quality;
 
 	private static Map<String, String[]> graph;
@@ -79,34 +78,9 @@ public class BackLinkStrategyTest {
 		quality.put("http://z.de/56", 1);
 
 		graph = new LinkedHashMap<>();
-		graph.put("http://a.de/5", new String[] { "http://a.de/7", "http://a.de/2", "http://c.de/32", "http://d.de/7", "http://h.de/5" });
-		graph.put("http://a.de/7", new String[] { "http://a.de/5", "http://d.de/97", "http://h.de/6" });
-		graph.put("http://a.de/2", new String[] { "http://a.de/5", "http://q.de/7", "http://h.de/3" });
-		/*graph.put("http://b", new String[] { "a", "j", "z" });
-		graph.put("http://c", new String[] { "b", "d", "l", "m", "o" });
-		graph.put("http://d", new String[] { "b", "d", "f", "q" });
-		graph.put("http://e", new String[] { "t", "m", "c" });
-		graph.put("http://f", new String[] { "y", "o" });
-		graph.put("http://g", new String[] { "x", "l", "l", "d" });
-		graph.put("http://h", new String[] { "w", "d" });
-		graph.put("http://i", new String[] { "l", "e" });
-		graph.put("http://j", new String[] { "f", "k" });
-		graph.put("http://k", new String[] { "d", "l" });
-		graph.put("http://l", new String[] { "s", "z" });
-		graph.put("http://m", new String[] { "c", "i" });
-		graph.put("http://n", new String[] { "p", "j" });
-		graph.put("http://o", new String[] { "b", "a" });
-		graph.put("http://p", new String[] { "c", "u" });
-		graph.put("http://q", new String[] { "u", "d", "m" });
-		graph.put("http://r", new String[] { "r", "c" });
-		graph.put("http://s", new String[] { "h", "v" });
-		graph.put("http://t", new String[] { "w", "v" });
-		graph.put("http://u", new String[] { "q", "q" });
-		graph.put("http://v", new String[] { "o", "i" });
-		graph.put("http://w", new String[] { "k", "g", "e", "l" });
-		graph.put("http://x", new String[] { "l", "l" });
-		graph.put("http://y", new String[] { "s", "s" });
-		graph.put("http://z", new String[] { "m", "d", "s" });*/
+		graph.put("http://a.de/5", new String[] {"http://a.de/7", "http://a.de/2", "http://c.de/32", "http://d.de/7", "http://h.de/5"});
+		graph.put("http://a.de/7", new String[] {"http://a.de/5", "http://d.de/97", "http://h.de/6"});
+		graph.put("http://a.de/2", new String[] {"http://a.de/5", "http://q.de/7", "http://h.de/3"});
 	}
 
 	@Test
@@ -114,30 +88,30 @@ public class BackLinkStrategyTest {
 		SiteStrategy siteStrategy = new AbstractSiteCrawlingStrategy() {
 
 			@Override
-			public void start(Collection<String> urls, String stepQualityFile) {}
+			public void start(Collection<String> urls, String stepQualityFile) {
+			}
 
 			@Override
-			public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {}
-
+			public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
+			}
 		};
 
-		BackLinkStrategy bls = new BackLinkStrategy(siteStrategy, 100);
+		BacklinkStrategy bls = new BacklinkStrategy(siteStrategy, 100);
 
 		siteStrategy.setQualityMap(quality);
 		siteStrategy.setWebGraph(graph);
 		siteStrategy.setPageStrategy(bls);
+		bls.init();
 
-		Set<String> seen = new LinkedHashSet<>();
-
-		Queue<String> queue = new LinkedList<>(Arrays.asList(new String[] { "http://a.de/5" }));
-		queue = bls.crawl("http://a.de", queue, seen);
+		Queue<String> queue = new LinkedList<>(Arrays.asList(new String[] {"http://a.de/5"}));
+		queue = bls.crawl("http://a.de", queue);
 		String page = queue.poll();
 		assertEquals("http://a.de/5", page);
-		seen.add(page);
 		queue = new LinkedList<>(Arrays.asList(graph.get(page.toString())));
-		queue = bls.crawl("http://a.de", queue, seen);
+		queue = bls.crawl("http://a.de", queue);
 		page = queue.poll();
-		seen.add(page);
 		assertEquals("http://a.de/7", page);
+
+		bls.close();
 	}
 }

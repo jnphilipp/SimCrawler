@@ -12,11 +12,11 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-
 import org.simcrawler.crawling.site.AbstractSiteCrawlingStrategy;
 
 /**
  * Max page priority crawling strategy.
+ *
  * @author jnphilipp
  * @version 0.0.1
  * @scince 2014-12-02
@@ -42,16 +42,15 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 		final Queue<String> queue = new LinkedList<>(sites.keySet());
 		int good = 0, crawled = 0, queueSize = urls.size(), steps = 1;
 
+		this.pageStrategy.init();
 		do {
 			long time = System.currentTimeMillis();
 			Set<Future<Integer>> futures = new LinkedHashSet<>();
 			final Set<String> newURLs = Collections.synchronizedSet(new LinkedHashSet<String>());
 
 			for ( int i = 0; i < this.k; i++ ) {
-				crawled++;
-				queueSize--;
 				final String site = queue.poll();
-				if ( sites.get(site).size() != 0 )
+				if ( sites.get(site).size() != 0 ) {
 					futures.add(this.executor.submit(new Callable<Integer>() {
 						@Override
 						public Integer call() throws Exception {
@@ -67,10 +66,17 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 							return crawlSite.evaluate(page);
 						}
 					}));
+
+					crawled++;
+					queueSize--;
+				}
+				else
+					i--;
 				queue.add(site);
 			}
 
 			good += this.sum(futures);
+			int addedURLs = queueSize;
 			for ( String page : this.getURLsToAdd(seen, newURLs) ) {
 				queueSize++;
 
@@ -81,21 +87,27 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 				q.add(page);
 				sites.put(site, q);
 			}
+			addedURLs = queueSize - addedURLs;
 
-			List<String> sorted = new LinkedList<>(queue);
-			Collections.sort(sorted, new Comparator<String>() {
-				@Override
-				public int compare(String o1, String o2) {
-					return Double.compare(pageStrategy.getMaxPage(o2), pageStrategy.getMaxPage(o1));
-				}
-			});
-			queue.clear();
-			queue.addAll(sorted);
+			if ( steps % this.pageStrategy.getBatchSize() == 0 ) {
+				List<String> sorted = new LinkedList<>(queue);
+				Collections.sort(sorted, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						return Double.compare(pageStrategy.getMaxPage(o2), pageStrategy.getMaxPage(o1));
+					}
+				});
+				queue.clear();
+				queue.addAll(sorted);
+			}
 
 			this.writeStepQuality(stepQualityFile, good, crawled);
-			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\ttime: %s sec", steps, maxSteps, queueSize, crawled, (System.currentTimeMillis() - time) / 1000.0f));
+			System.out.println(String.format("Step %s of %s.\tQueue: %s\tCrawled: %s\tnew URLs: %s\ttime: %s sec", steps, maxSteps, queueSize, crawled, addedURLs, (System.currentTimeMillis() - time) / 1000.0f));
 			steps++;
-		} while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );
+		}
+		while ( !queue.isEmpty() && (steps <= maxSteps || maxSteps == -1) );
+
+		this.pageStrategy.close();
 		this.executor.shutdownNow();
 	}
 }

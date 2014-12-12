@@ -3,12 +3,11 @@
  */
 package org.simcrawler.crawling.site;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Collection;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author jnphilipp
@@ -22,10 +21,12 @@ public class AbstractSiteCrawlingStrategyTest {
 	public static void beforeClass() {
 		strategy = new AbstractSiteCrawlingStrategy() {
 			@Override
-			public void start(Collection<String> urls, String stepQualityFile) {}
+			public void start(Collection<String> urls, String stepQualityFile) {
+			}
 
 			@Override
-			public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {}
+			public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
+			}
 		};
 	}
 

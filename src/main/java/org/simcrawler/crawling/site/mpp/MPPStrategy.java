@@ -36,13 +36,13 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 	}
 
 	@Override
-	public void start(Collection<String> urls, String stepQualityFile, int maxSteps) {
-		final Set<String> seen = Collections.synchronizedSet(new LinkedHashSet<>(urls));
-		final Map<String, Queue<String>> sites = this.fillSites(urls);
+	public void start(Collection<String> seeds, String stepQualityFile, int maxSteps) {
+		final Set<String> seen = Collections.synchronizedSet(new LinkedHashSet<>(seeds));
+		final Map<String, Queue<String>> sites = this.fillSites(seeds);
 		final Queue<String> queue = new LinkedList<>(sites.keySet());
-		int good = 0, crawled = 0, queueSize = urls.size(), steps = 1;
+		int good = 0, crawled = 0, queueSize = seeds.size(), steps = 1;
 
-		this.pageStrategy.init();
+		this.pageStrategy.init(seeds);
 		do {
 			long time = System.currentTimeMillis();
 			Set<Future<Integer>> futures = new LinkedHashSet<>();
@@ -77,7 +77,9 @@ public class MPPStrategy extends AbstractSiteCrawlingStrategy {
 
 			good += this.sum(futures);
 			int addedURLs = queueSize;
-			for ( String page : this.getURLsToAdd(seen, newURLs) ) {
+			Set<String> tmp = this.getURLsToAdd(seen, newURLs);
+			this.pageStrategy.update(tmp);
+			for ( String page : tmp ) {
 				queueSize++;
 
 				String site = this.getSite(page);

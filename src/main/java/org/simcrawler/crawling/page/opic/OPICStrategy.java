@@ -1,5 +1,6 @@
 package org.simcrawler.crawling.page.opic;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -8,9 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import org.simcrawler.crawling.page.AbstractPageCrawlingStrategy;
-import org.simcrawler.crawling.site.SiteStrategy;
+import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 
 /**
+ * OPIC strategy.
  *
  * @author proewer, jnphilipp
  * @since 2014-12-02
@@ -22,7 +24,7 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 	private Map<String, Integer> batchSizeSiteCount;
 	private Map<String, Double> siteMaxScore;
 
-	public OPICStrategy(SiteStrategy siteStrategy, int batchSize) {
+	public OPICStrategy(SiteCrawlingStrategy siteStrategy, int batchSize) {
 		super(siteStrategy, batchSize);
 	}
 
@@ -51,7 +53,7 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 		//update history
 		String page = queue.peek();
 		this.opicHistory.put(page, (this.opicHistory.containsKey(page) ? this.opicHistory.get(page) : 0) + this.cache);
-		String[] links = this.getSiteStrategy().getCrawlSite().getLinks(page);
+		String[] links = this.getSiteCrawlingStrategy().getCrawlSite().getLinks(page);
 		double i = links.length == 0 ? 0 : this.opicHistory.get(page) / links.length;
 		for ( String link : links )
 			this.opicHistory.put(link, (this.opicHistory.containsKey(link) ? this.opicHistory.get(link) : 0) + i);
@@ -60,7 +62,7 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 		//update db
 		if ( !this.batchSizeSiteCount.containsKey(site) )
 			this.batchSizeSiteCount.put(site, 0);
-		for ( String url : this.getSiteStrategy().getCrawlSite().getLinks(queue.peek()) )
+		for ( String url : this.getSiteCrawlingStrategy().getCrawlSite().getLinks(queue.peek()) )
 			if ( url.startsWith(site) )
 				this.batchSizeSiteCount.put(site, this.batchSizeSiteCount.get(site) + 1);
 
@@ -73,13 +75,18 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 	}
 
 	@Override
-	public void init() {
+	public void init(Collection<String> seeds) {
 		this.opicHistory = Collections.synchronizedMap(new LinkedHashMap<String, Double>());
 		this.batchSizeSiteCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
 		this.siteMaxScore = Collections.synchronizedMap(new LinkedHashMap<String, Double>());
 
-		this.cache = 1 / 220749131.0d;
+		this.cache = 1.0d / seeds.size();
 		this.g = 0.0d;
+	}
+
+	@Override
+	public void update(Collection<String> seeds) {
+		this.cache = 1.0d / ((1.0d / this.cache) + seeds.size());
 	}
 
 	@Override

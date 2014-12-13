@@ -1,5 +1,6 @@
 package org.simcrawler.crawling.page.bl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import org.simcrawler.crawling.page.AbstractPageCrawlingStrategy;
-import org.simcrawler.crawling.site.SiteStrategy;
+import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 
 /**
  * Backlink page strategy.
@@ -21,7 +22,7 @@ public class BacklinkStrategy extends AbstractPageCrawlingStrategy {
 	private Map<String, Integer> batchSizeSiteCount;
 	private Map<String, Integer> siteMaxBacklinkCount;
 
-	public BacklinkStrategy(SiteStrategy siteStrategy, int batchSize) {
+	public BacklinkStrategy(SiteCrawlingStrategy siteStrategy, int batchSize) {
 		super(siteStrategy, batchSize);
 	}
 
@@ -67,10 +68,14 @@ public class BacklinkStrategy extends AbstractPageCrawlingStrategy {
 	}
 
 	@Override
-	public void init() {
+	public void init(Collection<String> seeds) {
 		this.backlinkCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
 		this.batchSizeSiteCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
 		this.siteMaxBacklinkCount = Collections.synchronizedMap(new LinkedHashMap<String, Integer>());
+	}
+
+	@Override
+	public void update(Collection<String> seeds) {
 	}
 
 	@Override

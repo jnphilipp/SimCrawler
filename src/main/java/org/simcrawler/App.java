@@ -13,7 +13,7 @@ import org.simcrawler.crawling.CrawlingStrategy;
 import org.simcrawler.crawling.bfs.BFSStrategy;
 import org.simcrawler.crawling.page.bl.BacklinkStrategy;
 import org.simcrawler.crawling.page.opic.OPICStrategy;
-import org.simcrawler.crawling.site.SiteStrategy;
+import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 import org.simcrawler.crawling.site.mpp.MPPStrategy;
 import org.simcrawler.crawling.site.rrs.RRStrategy;
 import org.simcrawler.io.FileReader;
@@ -190,11 +190,11 @@ public class App {
 		crawlingStrategy.setQualityMap(qualityMap);
 		crawlingStrategy.setWebGraph(webGraph);
 
-		if ( crawlingStrategy instanceof SiteStrategy )
+		if ( crawlingStrategy instanceof SiteCrawlingStrategy )
 			if ( backlink )
-				((SiteStrategy) crawlingStrategy).setPageStrategy(new BacklinkStrategy((SiteStrategy) crawlingStrategy, batchSize));
+				((SiteCrawlingStrategy) crawlingStrategy).setPageCrawlingStrategy(new BacklinkStrategy((SiteCrawlingStrategy) crawlingStrategy, batchSize));
 			else if ( opic )
-				((SiteStrategy) crawlingStrategy).setPageStrategy(new OPICStrategy((SiteStrategy) crawlingStrategy, batchSize));
+				((SiteCrawlingStrategy) crawlingStrategy).setPageCrawlingStrategy(new OPICStrategy((SiteCrawlingStrategy) crawlingStrategy, batchSize));
 			else
 				crawlingStrategy = null;
 

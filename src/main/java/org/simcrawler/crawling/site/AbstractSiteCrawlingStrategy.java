@@ -10,21 +10,21 @@ import java.util.regex.Pattern;
 import org.simcrawler.crawling.AbstractCrawlingStrategy;
 import org.simcrawler.crawling.CrawlSite;
 import org.simcrawler.crawling.CrawlSiteImpl;
-import org.simcrawler.crawling.page.PageStrategy;
+import org.simcrawler.crawling.page.PageCrawlingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class for crawling strategies.
+ * Abstract class for site crawling strategies.
  *
  * @author jnphilipp
  * @version 0.0.1
  * @scince 2014-11-17
  */
-public abstract class AbstractSiteCrawlingStrategy extends AbstractCrawlingStrategy implements SiteStrategy {
+public abstract class AbstractSiteCrawlingStrategy extends AbstractCrawlingStrategy implements SiteCrawlingStrategy {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSiteCrawlingStrategy.class);
 	protected CrawlSite crawlSite;
-	protected PageStrategy pageStrategy;
+	protected PageCrawlingStrategy pageStrategy;
 
 	public AbstractSiteCrawlingStrategy() {
 		super();
@@ -36,6 +36,12 @@ public abstract class AbstractSiteCrawlingStrategy extends AbstractCrawlingStrat
 		this.crawlSite = new CrawlSiteImpl(this);
 	}
 
+	/**
+	 * Creates a map with the site URL as key and all pages in the queue.
+	 *
+	 * @param urls collection of URLs
+	 * @return map with site URLs for the key and all pages as the key
+	 */
 	protected Map<String, Queue<String>> fillSites(Collection<String> urls) {
 		Map<String, Queue<String>> sites = new LinkedHashMap<>();
 		for ( String url : urls ) {
@@ -60,7 +66,7 @@ public abstract class AbstractSiteCrawlingStrategy extends AbstractCrawlingStrat
 	}
 
 	@Override
-	public void setPageStrategy(PageStrategy pageStrategy) {
+	public void setPageCrawlingStrategy(PageCrawlingStrategy pageStrategy) {
 		this.pageStrategy = pageStrategy;
 	}
 }

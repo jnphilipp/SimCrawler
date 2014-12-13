@@ -3,17 +3,18 @@
  */
 package org.simcrawler.crawling.page;
 
-import org.simcrawler.crawling.page.bl.BacklinkStrategy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.simcrawler.crawling.page.bl.BacklinkStrategy;
 import org.simcrawler.crawling.site.AbstractSiteCrawlingStrategy;
-import org.simcrawler.crawling.site.SiteStrategy;
+import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 
 import static org.junit.Assert.assertEquals;
 
@@ -85,7 +86,7 @@ public class BacklinkStrategyTest {
 
 	@Test
 	public void test() {
-		SiteStrategy siteStrategy = new AbstractSiteCrawlingStrategy() {
+		SiteCrawlingStrategy siteStrategy = new AbstractSiteCrawlingStrategy() {
 
 			@Override
 			public void start(Collection<String> urls, String stepQualityFile) {
@@ -100,14 +101,16 @@ public class BacklinkStrategyTest {
 
 		siteStrategy.setQualityMap(quality);
 		siteStrategy.setWebGraph(graph);
-		siteStrategy.setPageStrategy(bls);
-		bls.init();
+		siteStrategy.setPageCrawlingStrategy(bls);
+		List<String> seeds = Arrays.asList(new String[] {"http://a.de/5"});
+		bls.init(seeds);
 
-		Queue<String> queue = new LinkedList<>(Arrays.asList(new String[] {"http://a.de/5"}));
+		Queue<String> queue = new LinkedList<>(seeds);
 		queue = bls.crawl("http://a.de", queue);
 		String page = queue.poll();
 		assertEquals("http://a.de/5", page);
 		queue = new LinkedList<>(Arrays.asList(graph.get(page.toString())));
+		bls.update(queue);
 		queue = bls.crawl("http://a.de", queue);
 		page = queue.poll();
 		assertEquals("http://a.de/7", page);

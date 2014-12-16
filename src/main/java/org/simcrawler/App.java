@@ -220,6 +220,15 @@ public class App {
 						+ "\n\t--step_quality\t\t: step quality output file"
 						+ "\n\t-ms"
 						+ "\n\t--max_steps\t\t: maximum number of steps (optinal)"
+						+ "\n\t-rr"
+						+ "\n\t--raound_robin: round robin page crawling strategy"
+						+ "\n\t-mpp"
+						+ "\n\t--max_page_priority: max page priority page crawling strategy"
+						+ "\n\t-bl"
+						+ "\n\t--backlink: backlink site crawling strategy"
+						+ "\n\t-opic: opic site crawling strategy"
+						+ "\n\t-b"
+						+ "\n\t--batch_size: batch size"
 						+ "\n\nIf no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.");
 		System.exit(0);
 	}

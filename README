@@ -2,17 +2,26 @@
 SimCrawler
 
 usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>
-	-k									: urls per crawling step
+	-k			            : urls per crawling step
 	-qm
-	--quallity_mapping	: quality mapping input file
+	--quality_mapping	  : quality mapping input file
 	-wg
-	--web_graph					: web graph input file
+	--web_graph		      : web graph input file
 	-sf
-	--seed_file					: seed url input file
+	--seed_file	      	: seed url input file
 	-sq
-	--step_quality			: step quality output file
+	--step_quality		  : step quality output file
 	-ms
-	--max_steps					: maximum number of steps (optinal)
+	--max_steps		      : maximum number of steps (optinal)
+	-rr
+	--raound_robin      : round robin page crawling strategy
+	-mpp
+	--max_page_priority : max page priority page crawling strategy
+	-bl
+	--backlink          : backlink site crawling strategy
+	-opic               : opic site crawling strategy
+	-b
+	--batch_size        : batch size
 
 If no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.
 

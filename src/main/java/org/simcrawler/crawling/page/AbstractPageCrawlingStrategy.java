@@ -1,5 +1,7 @@
 package org.simcrawler.crawling.page;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 
 /**
@@ -12,6 +14,7 @@ import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 public abstract class AbstractPageCrawlingStrategy implements PageCrawlingStrategy {
 	protected int batchSize;
 	protected SiteCrawlingStrategy siteStrategy;
+	protected Map<String, Integer> batchSizeSiteCount;
 
 	public AbstractPageCrawlingStrategy(SiteCrawlingStrategy siteStrategy, int batchSize) {
 		this.siteStrategy = siteStrategy;

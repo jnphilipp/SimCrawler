@@ -13,6 +13,7 @@ import org.simcrawler.crawling.CrawlingStrategy;
 import org.simcrawler.crawling.bfs.BFSStrategy;
 import org.simcrawler.crawling.page.bl.BacklinkStrategy;
 import org.simcrawler.crawling.page.opic.OPICStrategy;
+import org.simcrawler.crawling.page.optimal.OptimalStrategy;
 import org.simcrawler.crawling.site.SiteCrawlingStrategy;
 import org.simcrawler.crawling.site.mpp.MPPStrategy;
 import org.simcrawler.crawling.site.rrs.RRStrategy;
@@ -107,6 +108,7 @@ public class App {
 		boolean maxPagePriority = false;
 		boolean backlink = false;
 		boolean opic = false;
+		boolean optimal = false;
 
 		if ( args.length != 0 ) {
 			List<String> l = Arrays.asList(args);
@@ -156,6 +158,12 @@ public class App {
 						opic = true;
 						backlink = false;
 						break;
+					case "-o":
+					case "-optimal":
+						optimal = true;
+						backlink = false;
+						opic = false;
+						break;
 					case "-b":
 					case "--batch_size":
 						batchSize = Integer.parseInt(it.next());
@@ -195,6 +203,8 @@ public class App {
 				((SiteCrawlingStrategy) crawlingStrategy).setPageCrawlingStrategy(new BacklinkStrategy((SiteCrawlingStrategy) crawlingStrategy, batchSize));
 			else if ( opic )
 				((SiteCrawlingStrategy) crawlingStrategy).setPageCrawlingStrategy(new OPICStrategy((SiteCrawlingStrategy) crawlingStrategy, batchSize));
+			else if ( optimal )
+				((SiteCrawlingStrategy) crawlingStrategy).setPageCrawlingStrategy(new OptimalStrategy((SiteCrawlingStrategy) crawlingStrategy, batchSize));
 			else
 				crawlingStrategy = null;
 
@@ -221,12 +231,14 @@ public class App {
 						+ "\n\t-ms"
 						+ "\n\t--max_steps\t\t: maximum number of steps (optinal)"
 						+ "\n\t-rr"
-						+ "\n\t--raound_robin: round robin page crawling strategy"
+						+ "\n\t-raound_robin: round robin page crawling strategy"
 						+ "\n\t-mpp"
-						+ "\n\t--max_page_priority: max page priority page crawling strategy"
+						+ "\n\t-max_page_priority: max page priority page crawling strategy"
 						+ "\n\t-bl"
-						+ "\n\t--backlink: backlink site crawling strategy"
+						+ "\n\t-backlink: backlink site crawling strategy"
 						+ "\n\t-opic: opic site crawling strategy"
+						+ "\n\t-o"
+						+ "\n\t-optimal: optimal site crawling strategy"
 						+ "\n\t-b"
 						+ "\n\t--batch_size: batch size"
 						+ "\n\nIf no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.");

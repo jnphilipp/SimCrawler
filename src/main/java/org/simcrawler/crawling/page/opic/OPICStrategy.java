@@ -21,7 +21,6 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 	private double cache;
 	private double g;
 	private Map<String, Double> opicHistory;
-	private Map<String, Integer> batchSizeSiteCount;
 	private Map<String, Double> siteMaxScore;
 
 	public OPICStrategy(SiteCrawlingStrategy siteStrategy, int batchSize) {
@@ -29,7 +28,7 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 	}
 
 	@Override
-	public Queue<String> crawl(String site, Queue<String> queue) {
+	public Queue<String> crawl(String site, Queue<String> queue, int crawled) {
 		//sort queue
 		Integer bsc = this.batchSizeSiteCount.get(site);
 		if ( (bsc == null ? 0 : bsc) >= this.getBatchSize() ) {
@@ -72,6 +71,13 @@ public class OPICStrategy extends AbstractPageCrawlingStrategy {
 	@Override
 	public double getMaxPage(String site) {
 		return this.siteMaxScore.containsKey(site) ? this.siteMaxScore.get(site) : 0;
+	}
+
+	/**
+	 * @return the opicHistory
+	 */
+	public Map<String, Double> getOpicHistory() {
+		return this.opicHistory;
 	}
 
 	@Override

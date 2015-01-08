@@ -106,12 +106,12 @@ public class BacklinkStrategyTest {
 		bls.init(seeds);
 
 		Queue<String> queue = new LinkedList<>(seeds);
-		queue = bls.crawl("http://a.de", queue);
+		queue = bls.crawl("http://a.de", queue, 0);
 		String page = queue.poll();
 		assertEquals("http://a.de/5", page);
 		queue = new LinkedList<>(Arrays.asList(graph.get(page.toString())));
 		bls.update(queue);
-		queue = bls.crawl("http://a.de", queue);
+		queue = bls.crawl("http://a.de", queue, 1);
 		page = queue.poll();
 		assertEquals("http://a.de/7", page);
 

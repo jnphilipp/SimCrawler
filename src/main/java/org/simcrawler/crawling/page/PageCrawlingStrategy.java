@@ -16,9 +16,10 @@ public interface PageCrawlingStrategy {
 	 *
 	 * @param site site
 	 * @param queue queue with pages of the given site
+	 * @param crawled total number of crawled pages
 	 * @return reordered queue
 	 */
-	public Queue<String> crawl(String site, Queue<String> queue);
+	public Queue<String> crawl(String site, Queue<String> queue, int crawled);
 
 	/**
 	 * Returns the highest ranking of the pages for the given site.

@@ -19,7 +19,6 @@ import org.simcrawler.crawling.site.SiteCrawlingStrategy;
  */
 public class BacklinkStrategy extends AbstractPageCrawlingStrategy {
 	private Map<String, Integer> backlinkCount;
-	private Map<String, Integer> batchSizeSiteCount;
 	private Map<String, Integer> siteMaxBacklinkCount;
 
 	public BacklinkStrategy(SiteCrawlingStrategy siteStrategy, int batchSize) {
@@ -27,7 +26,7 @@ public class BacklinkStrategy extends AbstractPageCrawlingStrategy {
 	}
 
 	@Override
-	public Queue<String> crawl(String site, Queue<String> queue) {
+	public Queue<String> crawl(String site, Queue<String> queue, int crawled) {
 		//sort
 		Integer bsc = this.batchSizeSiteCount.get(site);
 		synchronized ( this.backlinkCount ) {
@@ -60,6 +59,13 @@ public class BacklinkStrategy extends AbstractPageCrawlingStrategy {
 		}
 
 		return queue;
+	}
+
+	/**
+	 * @return the backlinkCount
+	 */
+	public Map<String, Integer> getBacklinkCount() {
+		return this.backlinkCount;
 	}
 
 	@Override

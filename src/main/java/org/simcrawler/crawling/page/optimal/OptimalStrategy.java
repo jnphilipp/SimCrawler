@@ -83,6 +83,12 @@ public class OptimalStrategy extends AbstractPageCrawlingStrategy {
 		return queue;
 	}
 
+	/**
+	 * Calculates the normalized backlink count for the given page.
+	 * @param page page
+	 * @param crawled total number of crawled pages
+	 * @return normalized backlink count for given page
+	 */
 	private double fBL(String page, int crawled) {
 		return (double)(this.bl.getBacklinkCount().containsKey(page) ? this.bl.getBacklinkCount().get(page) : 0) / (double)crawled;
 	}

@@ -54,10 +54,8 @@ public class OptimalStrategy extends AbstractPageCrawlingStrategy {
 				else
 					v = (double)r[0] / (double)r[1];
 
-				double varBL = this.varBL(pages, crawled, v);
-				double varOPIC = this.varOPIC(pages, crawled, v);
 				for ( String page : pages )
-					o.put(page, Math.log(Math.exp(varBL * this.fBL(page, crawled) * 100) + Math.exp(varOPIC * (this.opic.getOpicHistory().containsKey(page) ? this.opic.getOpicHistory().get(page) : 0)) * (1.0d / v)));
+					o.put(page, Math.log((this.opic.getOpicHistory().containsKey(page) ? this.opic.getOpicHistory().get(page) : 0) * this.fBL(page, crawled) * v));
 
 				Collections.sort(pages, new Comparator<String>() {
 					@Override
@@ -83,30 +81,6 @@ public class OptimalStrategy extends AbstractPageCrawlingStrategy {
 				this.batchSizeSiteCount.put(site, this.batchSizeSiteCount.get(site) + 1);
 
 		return queue;
-	}
-
-	private double varBL(Collection<String> pages, int crawled, double v) {
-		double E = 0.0d;
-		for ( String page : pages )
-			E += this.fBL(page, crawled) * v;
-
-		double var = 0.0d;
-		for ( String page : pages )
-			var += Math.pow(this.fBL(page, crawled) - E, 2) * v;
-
-		return var;
-	}
-
-	private double varOPIC(Collection<String> pages, int crawled, double v) {
-		double E = 0.0d;
-		for ( String page : pages )
-			E += (this.opic.getOpicHistory().containsKey(page) ? this.opic.getOpicHistory().get(page) : 0) * v;
-
-		double var = 0.0d;
-		for ( String page : pages )
-			var += Math.pow((this.opic.getOpicHistory().containsKey(page) ? this.opic.getOpicHistory().get(page) : 0) - E, 2) * v;
-
-		return var;
 	}
 
 	private double fBL(String page, int crawled) {

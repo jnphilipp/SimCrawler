@@ -1,7 +1,38 @@
-
 SimCrawler
+==========
 
-usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>
+This project was develop as an programming exercise for the course Computational-
+Advertising at the University Leipzig. It consisted of three task. The first one
+was to implement a breadth-first search crawling strategy. The second task
+consisted of writing two page level and two site level crawling strategies, which
+should be freely combinable. The page level strategies were round robin and max
+page priority and for the site level backlink and OPIC. The third task was to
+combine the site level strategies to one and implement it as optimal strategy.
+
+
+
+Files
+-----
+
+There are three different input files:
+1. the link graph file, this file holds the entry link graph which will be used. The
+file needs to be sorted (for faster read) and each line has the following format:
+<from URL><TAB><to URL>
+
+2. the quality mapping file, this file holds the mapping whether a URL is a good
+one or not, we had values which were either 1 or 0. Each line has the following
+format:
+<URL> <quality>
+
+3. the seed file, this file contains the seed URL with which the crawler will
+start, each line has one URL.
+
+
+
+Usage
+-----
+
+simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>
 	-k			: urls per crawling step
 	-qm
 	--quality_mapping	: quality mapping input file
@@ -27,5 +58,10 @@ usage: simcrawler -k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -
 
 If no web graph file and/or quality mapping file is given a mapdb file is expected in ./data.
 
+
+
+Compile
+-------
+
 [Maven]
-mvn clean compile exec:java -Dexec.args="-k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"
+mvn clean compile test exec:java -Dexec.args="-k <k> -qm <quality mapping> -wg <web graph> -sf <seed urls> -sq <step quality> -ms <max steps>"

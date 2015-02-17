@@ -1,13 +1,14 @@
 SimCrawler
 ==========
 
-This project was develop as an programming exercise for the course Computational-
-Advertising at the University Leipzig. It consisted of three task. The first one
-was to implement a breadth-first search crawling strategy. The second task
-consisted of writing two page level and two site level crawling strategies, which
-should be freely combinable. The page level strategies were round robin and max
-page priority and for the site level backlink and OPIC. The third task was to
-combine the site level strategies to one and implement it as optimal strategy.
+This project was develop as an programming exercise for the course Computational
+Advertising at the University of Leipzig. The main task was to implement a
+simulated web crawler, with three parts. The first one was to implement a
+breadth-first search crawling strategy. The second task consisted of writing two
+page level and two site level crawling strategies, which should be freely
+combinable. The page level strategies were round robin and max page priority and
+for the site level backlink and OPIC. The third task was to combine the site
+level strategies to one and implement it as optimal strategy.
 
 
 
